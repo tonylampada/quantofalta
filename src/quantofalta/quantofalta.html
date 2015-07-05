@@ -23,4 +23,23 @@
         <label>Parcelado restante</label>
         <input type="number" ng-change="m.save()" ng-model="m.parcelado_restante">
     </md-input-container>
+    <div layout="row">
+        <md-input-container>
+            <label>Novo gasto</label>
+            <input ng-model="m.novogasto">
+        </md-input-container>
+        <md-input-container>
+            <label>Valor</label>
+            <input ng-model="m.novovalor">
+        </md-input-container>
+        <md-button ng-click="m.add_gasto()" class="md-raised md-primary">+</md-button>
+    </div>
+    <md-list>
+        <md-list-item ng-repeat="g in m.gastos">
+            <span>{{g.descricao}}</span>
+            <span flex></span>
+            <span>{{g.valor}}</span>
+            <md-button ng-click="m.remove_gasto(g)" class="md-raised">-<md-raised>
+        </md-list-item>
+    </md-list>
 </div>

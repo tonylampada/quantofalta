@@ -3,16 +3,21 @@ angular.module('quantofalta', []);
 angular.module('quantofalta').factory('QFModel', function(){
     var s = localStorage.getItem('quantofalta');
     var m = s ? JSON.parse(s) : {
-        saldoinicial: 0,
-        custofixo: 0,
-        parcelado_restante: 0,
-        lim_total: 0,
-        lim_atual: 0,
+        saldoinicial: '',
+        custofixo: '',
+        parcelado_restante: '',
+        lim_total: '',
+        lim_atual: '',
+        gastos: [],
+        novogasto: '',
+        novovalor: '',
     };
 
     angular.extend(m, {
         proxima_fatura: proxima_fatura,
         disponivel: disponivel,
+        add_gasto: add_gasto,
+        remove_gasto: remove_gasto,
         save: save,
     });
 
@@ -21,7 +26,27 @@ angular.module('quantofalta').factory('QFModel', function(){
     }
 
     function disponivel(){
-        return m.saldoinicial - m.custofixo - m.proxima_fatura();
+        var somagastos = 0;
+        m.gastos.map(function(g){
+            somagastos += g.valor;
+        })
+        return m.saldoinicial - m.custofixo - m.proxima_fatura() - somagastos;
+    }
+
+    function add_gasto(){
+        if(!m.gastos){
+            m.gastos = [];
+        }
+        m.gastos.push({descricao: m.novogasto, valor: parseFloat(m.novovalor)});
+        m.novogasto = '';
+        m.novovalor = '';
+        m.save();
+    }
+
+    function remove_gasto(gasto){
+        var idx = m.gastos.indexOf(gasto);
+        m.gastos.splice(idx, 1);
+        m.save();
     }
 
     function save(){
