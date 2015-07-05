@@ -1,0 +1,26 @@
+<div layout="column">
+    <md-list>
+        <md-list-item><label>Disponivel esse mes: {{m.disponivel()}}</label></md-list-item>
+        <md-list-item><label>Proxima fatura: {{m.proxima_fatura()}}</label></md-list-item>
+    </md-list>
+    <md-input-container>
+        <label>Limite atual</label>
+        <input ng-model="m.lim_atual">
+    </md-input-container>
+    <md-input-container>
+        <label>Saldo inicial</label>
+        <input ng-model="m.saldoinicial">
+    </md-input-container>
+    <md-input-container>
+        <label>Custo fixo previsto</label>
+        <input ng-model="m.custofixo">
+    </md-input-container>
+    <md-input-container>
+        <label>Limite total</label>
+        <input ng-model="m.lim_total">
+    </md-input-container>
+    <md-input-container>
+        <label>Parcelado restante</label>
+        <input ng-model="m.parcelado_restante">
+    </md-input-container>
+</div>
