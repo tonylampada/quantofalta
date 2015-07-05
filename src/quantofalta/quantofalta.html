@@ -3,6 +3,7 @@
         <md-list-item><label>Disponivel esse mes: {{m.disponivel()}}</label></md-list-item>
         <md-list-item><label>Proxima fatura: {{m.proxima_fatura()}}</label></md-list-item>
     </md-list>
+    <md-divider></md-divider>
     <md-input-container>
         <label>Limite atual</label>
         <input type="number" ng-change="m.save()" ng-model="m.lim_atual">
@@ -30,7 +31,7 @@
         </md-input-container>
         <md-input-container>
             <label>Valor</label>
-            <input ng-model="m.novovalor">
+            <input type="number" ng-model="m.novovalor">
         </md-input-container>
         <md-button ng-click="m.add_gasto()" class="md-raised md-primary">+</md-button>
     </div>
