@@ -1,6 +1,6 @@
 angular.module("fstemplates", []).run(["$templateCache", function($templateCache) {$templateCache.put("TEMPLATE_CACHE/pages/docs.html","<html><head><meta name=\"viewport\" content=\"initial-scale=1\"><link rel=\"stylesheet\" href=\"./css/lib.css\"><link rel=\"stylesheet\" href=\"./css/fs.css\"><link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,400italic\"><link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/icon?family=Material+Icons\"><script src=\"./js/lib.js\"></script><!--FSJS--><!--FSJS END--><script>DOCS.angular_dependencies = [\'fsdocs\'];\n            FSDOCS.angular_dependencies = [];\n            if(FS.USE_TEAMPLE_CACHE){\n                DOCS.angular_dependencies.push(\'fstemplates\');\n                DOCS.angular_dependencies.push(\'docstemplates\');\n            }</script><!--DOCSJS--><!--DOCSJS END--><!--FSDOCSJS--><!--FSDOCSJS END--><script>angular.module(\'fsdocs\', FSDOCS.angular_dependencies);</script></head><body ng-app=\"docs_main\" layout=\"column\"><div layout=\"row\" flex><md-sidenav layout=\"column\" class=\"md-sidenav-left md-whiteframe-z2\" md-component-id=\"left\" md-is-locked-open=\"true\"><component-catalog-tree group=\"fs\"></component-catalog-tree></md-sidenav><div layout=\"column\" flex id=\"content\"><div ui-view></div></div></div></body></html>");
 $templateCache.put("TEMPLATE_CACHE/pages/index.html","<html manifest=\"cache.manifest\"><head><meta name=\"viewport\" content=\"initial-scale=1\"><link rel=\"stylesheet\" href=\"./css/lib.css\"><link rel=\"stylesheet\" href=\"./css/fs.css\"><link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,400italic\"><script src=\"./js/lib.js\"></script><!--FSJS--><!--FSJS END--></head><body ng-app=\"fs_main\"><quantofalta></quantofalta></body></html>");
-$templateCache.put("TEMPLATE_CACHE/quantofalta/quantofalta.html","<div layout=\"column\"><md-list><md-list-item><label>Disponivel esse mes: {{m.disponivel()}}</label></md-list-item><md-list-item><label>Proxima fatura: {{m.proxima_fatura()}}</label></md-list-item></md-list><md-input-container><label>Limite atual</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.lim_atual\"></md-input-container><md-input-container><label>Saldo inicial</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.saldoinicial\"></md-input-container><md-input-container><label>Custo fixo previsto</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.custofixo\"></md-input-container><md-input-container><label>Limite total</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.lim_total\"></md-input-container><md-input-container><label>Parcelado restante</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.parcelado_restante\"></md-input-container></div>");
+$templateCache.put("TEMPLATE_CACHE/quantofalta/quantofalta.html","<div layout=\"column\"><md-list><md-list-item><label>Disponivel esse mes: {{m.disponivel()}}</label></md-list-item><md-list-item><label>Proxima fatura: {{m.proxima_fatura()}}</label></md-list-item></md-list><md-input-container><label>Limite atual</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.lim_atual\"></md-input-container><md-input-container><label>Saldo inicial</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.saldoinicial\"></md-input-container><md-input-container><label>Custo fixo previsto</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.custofixo\"></md-input-container><md-input-container><label>Limite total</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.lim_total\"></md-input-container><md-input-container><label>Parcelado restante</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.parcelado_restante\"></md-input-container><div layout=\"row\"><md-input-container><label>Novo gasto</label><input ng-model=\"m.novogasto\"></md-input-container><md-input-container><label>Valor</label><input ng-model=\"m.novovalor\"></md-input-container><md-button ng-click=\"m.add_gasto()\" class=\"md-raised md-primary\">+</md-button></div><md-list><md-list-item ng-repeat=\"g in m.gastos\"><span>{{g.descricao}}</span> <span flex></span> <span>{{g.valor}}</span><md-button ng-click=\"m.remove_gasto(g)\" class=\"md-raised\">-<md-raised></md-raised></md-button></md-list-item></md-list></div>");
 $templateCache.put("TEMPLATE_CACHE/components/todo_example/todo.html","<div><md-content layout=\"row\" layout-sm=\"column\"><md-input-container><label>New task</label><input ng-model=\"m.newtodo\"></md-input-container><md-button class=\"md-raised md-primary\" ng-click=\"m.add()\">Add</md-button><md-progress-circular ng-if=\"m.adding\" md-mode=\"indeterminate\"></md-progress-circular></md-content><ul class=\"todo\"><li ng-repeat=\"todo in m.todos\"><span>{[{todo.description}]}</span><md-button class=\"md-raised\" ng-click=\"m.remove(todo)\">Remove</md-button></li></ul></div>");
 $templateCache.put("TEMPLATE_CACHE/components/toolbar/fstoolbar.html","<div class=\"md-toolbar-tools\"><h1><a ui-sref=\"home\">FreedomSponsors</a></h1><a class=\"md-button\" ui-sref=\"listprojects\">Projects</a> <a class=\"md-button\" ui-sref=\"search\">Search</a> <a class=\"md-button\" href>etc</a> <span flex></span> <a class=\"md-button\" ui-sref=\"viewuser({login: auth.user.username})\" ng-if=\"auth.authenticated()\">{[{auth.user.username}]} <a><a class=\"md-button\" hreff ng-click=\"auth.logout()\" ng-if=\"auth.authenticated()\">Logout <a><a class=\"md-button\" ui-sref=\"login\" ng-if=\"!auth.authenticated()\">Login</a></a></a></a></a></div>");}]);
 if(!window.FS){
@@ -96,16 +96,21 @@ angular.module('quantofalta', []);
 angular.module('quantofalta').factory('QFModel', function(){
     var s = localStorage.getItem('quantofalta');
     var m = s ? JSON.parse(s) : {
-        saldoinicial: 0,
-        custofixo: 0,
-        parcelado_restante: 0,
-        lim_total: 0,
-        lim_atual: 0,
+        saldoinicial: '',
+        custofixo: '',
+        parcelado_restante: '',
+        lim_total: '',
+        lim_atual: '',
+        gastos: [],
+        novogasto: '',
+        novovalor: '',
     };
 
     angular.extend(m, {
         proxima_fatura: proxima_fatura,
         disponivel: disponivel,
+        add_gasto: add_gasto,
+        remove_gasto: remove_gasto,
         save: save,
     });
 
@@ -114,7 +119,27 @@ angular.module('quantofalta').factory('QFModel', function(){
     }
 
     function disponivel(){
-        return m.saldoinicial - m.custofixo - m.proxima_fatura();
+        var somagastos = 0;
+        m.gastos.map(function(g){
+            somagastos += g.valor;
+        })
+        return m.saldoinicial - m.custofixo - m.proxima_fatura() - somagastos;
+    }
+
+    function add_gasto(){
+        if(!m.gastos){
+            m.gastos = [];
+        }
+        m.gastos.push({descricao: m.novogasto, valor: parseFloat(m.novovalor)});
+        m.novogasto = '';
+        m.novovalor = '';
+        m.save();
+    }
+
+    function remove_gasto(gasto){
+        var idx = m.gastos.indexOf(gasto);
+        m.gastos.splice(idx, 1);
+        m.save();
     }
 
     function save(){
