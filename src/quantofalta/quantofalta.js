@@ -1,7 +1,8 @@
 angular.module('quantofalta', []);
 
 angular.module('quantofalta').factory('QFModel', function(){
-    var m = {
+    var s = localStorage.getItem('quantofalta');
+    var m = s ? JSON.parse(s) : {
         saldoinicial: 0,
         custofixo: 0,
         parcelado_restante: 0,
@@ -12,6 +13,7 @@ angular.module('quantofalta').factory('QFModel', function(){
     angular.extend(m, {
         proxima_fatura: proxima_fatura,
         disponivel: disponivel,
+        save: save,
     });
 
     function proxima_fatura(){
@@ -20,6 +22,10 @@ angular.module('quantofalta').factory('QFModel', function(){
 
     function disponivel(){
         return m.saldoinicial - m.custofixo - m.proxima_fatura();
+    }
+
+    function save(){
+        localStorage.setItem('quantofalta', JSON.stringify(m));
     }
 
     return m;

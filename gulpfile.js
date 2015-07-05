@@ -10,7 +10,7 @@ var htmlmin = require('gulp-htmlmin');
 var merge = require('merge-stream');
 var jshint = require('gulp-jshint');
 var karma = require('karma').server;
-var argv = require('yargs').argv; 
+var argv = require('yargs').argv;
 
 ////////// parameters
 var mock = argv.mock == 'true' || argv.mock === undefined;
@@ -167,7 +167,7 @@ function jstesttask(id){
         files : concatall([
             lib.js,
             testlib.js,
-            docs.js, 
+            docs.js,
             fs.jstests,
         ]),
     }
@@ -217,7 +217,7 @@ function jshinttask(id){
 
 function linktaskdev(id){
     gulp.task(id, function() {
-        return gulp.src('./src/pages/*.html')
+        return gulp.src('./src/pages/*')
             .pipe(linker(linker_params(fsdocs.js, 'FSDOCSJS', '.')))
             .pipe(linker(linker_params(fs.js('dev'), 'FSJS', '.')))
             .pipe(linker(linker_params(docs.js, 'DOCSJS', '.')))
@@ -227,7 +227,7 @@ function linktaskdev(id){
 
 function linktaskprod(id){
     gulp.task(id, ['concatjsfs', 'concatjsfsdocs', 'concatjsdocs'], function() {
-        return gulp.src('./src/pages/*.html')
+        return gulp.src('./src/pages/*')
             .pipe(linker(linker_params('./dist/js/fs.js', 'FSJS', 'dist/')))
             .pipe(linker(linker_params('./dist/js/fsdocs.js', 'FSDOCSJS', 'dist/')))
             .pipe(linker(linker_params('./dist/js/docs.js', 'DOCSJS', 'dist/')))

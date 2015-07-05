@@ -5,22 +5,22 @@
     </md-list>
     <md-input-container>
         <label>Limite atual</label>
-        <input ng-model="m.lim_atual">
+        <input type="number" ng-change="m.save()" ng-model="m.lim_atual">
     </md-input-container>
     <md-input-container>
         <label>Saldo inicial</label>
-        <input ng-model="m.saldoinicial">
+        <input type="number" ng-change="m.save()" ng-model="m.saldoinicial">
     </md-input-container>
     <md-input-container>
         <label>Custo fixo previsto</label>
-        <input ng-model="m.custofixo">
+        <input type="number" ng-change="m.save()" ng-model="m.custofixo">
     </md-input-container>
     <md-input-container>
         <label>Limite total</label>
-        <input ng-model="m.lim_total">
+        <input type="number" ng-change="m.save()" ng-model="m.lim_total">
     </md-input-container>
     <md-input-container>
         <label>Parcelado restante</label>
-        <input ng-model="m.parcelado_restante">
+        <input type="number" ng-change="m.save()" ng-model="m.parcelado_restante">
     </md-input-container>
 </div>
