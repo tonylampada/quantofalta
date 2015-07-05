@@ -797,5 +797,5 @@ angular.module('component_catalog').controller('TodoSampleCtrl', function($scope
     $scope.add_laundry = function(){
         TODOModel.newtodo = 'Do the laundry';
         TODOModel.add();
-    }
+    };
 });

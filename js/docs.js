@@ -85,7 +85,7 @@ angular.module('component_catalog').factory('ComponentCatalogViewModel', functio
         m.components = ComponentCatalog.components.filter(function(e){
             return e.group == group_filter;
         });
-        var catmap = {}
+        var catmap = {};
         m.categories = [];
         for(var i=0; i<m.components.length; i++){
             var category = m.components[i].category;
@@ -101,6 +101,14 @@ angular.module('component_catalog').factory('ComponentCatalogViewModel', functio
     }
 
     function activate(component){
+
+        function _loadfile(sourcefile){
+            var url = DOCS.SAMPLE_BASE_URL + component.folder + sourcefile.name;
+            $http.get(url).success(function(content){
+                sourcefile.content = content;
+            });
+        }
+
         m.active_component = component;
         m.showing = 'EXAMPLE';
         if(component.source_files.length === 0){
@@ -108,13 +116,7 @@ angular.module('component_catalog').factory('ComponentCatalogViewModel', functio
             if(component.src){
                 component.source_files = component.source_files.concat(component.src.map(function(filename){ return {name: filename}; }));
             }
-            function loadfile(sourcefile){
-                var url = DOCS.SAMPLE_BASE_URL + component.folder + sourcefile.name;
-                $http.get(url).success(function(content){
-                    sourcefile.content = content;
-                });
-            }
-            component.source_files.map(loadfile);
+            component.source_files.map(_loadfile);
         }
         component.active_sourcefile = component.source_files[0];
     }
@@ -136,7 +138,7 @@ angular.module('component_catalog').factory('ComponentCatalogViewModel', functio
     }
 
     return m;
-})
+});
 
 angular.module('component_catalog').directive('componentCatalogTree', function(ComponentCatalogViewModel){
     return {
@@ -153,7 +155,7 @@ angular.module('component_catalog').directive('componentCatalogTree', function(C
                 return function(component){
                     return component.category == category_name;
                 };
-            }
+            };
         }
     };
 });
