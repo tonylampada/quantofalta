@@ -23,9 +23,8 @@ var fs = {
         var settingsjs = env == 'prod' ? './settings/prod.js' : './settings/dev.js';
         return [
             settingsjs,
-            './src/fs_global.js',
+            './src/global.js',
             './src/commons/jsutils.js',
-            './src/commons/fsngutils.js',
             './src/*.js',
             './src/!(api)/**/*.js',
             apijs,
@@ -34,9 +33,8 @@ var fs = {
     },
     jstests: [
         './settings/dev.js',
-        './src/fs_global.js',
+        './src/global.js',
         './src/commons/jsutils.js',
-        './src/commons/fsngutils.js',
         './src/*.js',
         './src/!(api)/**/*.js',
         './src/api/api_mock.js',
