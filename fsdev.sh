@@ -31,6 +31,8 @@ function fshelp {
     echo -e "                  The resulting html will use the concatenated .js files in the 'dist' folder"
     echo -e "                  Uses the ${RED}real${RESTORE} json API"
     echo -e ""
+    echo -e "${GREEN}updatemobile${RESTORE}      Updates the mobile code with the generated stuff"
+    echo -e ""
     echo -e "${GREEN}publish_ghpages${RESTORE}   Do a ${RED}prodmock${RESTORE} and commits the result in the ${RED}gh-pages${RESTORE} branch"
     echo -e "                  The result will be up in ${GREEN}http://freedomsponsors.github.io/fsstatic2${RESTORE}"
     echo -e ""
@@ -75,6 +77,14 @@ function prodbuild {
     return $exitcode
 }
 
+function updatemobile {
+    CD=$(pwd)
+    cd $FS
+    prodmock
+    cp -Rf dist/js dist/css quantofalta/www
+    cd $CD
+}
+
 function runserver {
     gulp runserver
 }
@@ -83,7 +93,7 @@ function produce_alias {
     echo "The green command below will create an alias that you can use "
     echo "to drop into FS dev env from anywhere in your bash."
     echo "You might want to add it to your ~/.bashrc file"
-    echo_green "alias fs='cd $(readlink -e $FS) && . fsdev.sh'"    
+    echo_green "alias fs='cd $(readlink -e $FS) && . fsdev.sh'"
 }
 
 function runjshint {
@@ -124,7 +134,7 @@ function publish_ghpages {
     git add .
     echo_green "Status 2:"
     git status
-    git commit -m 'publishing to gh-pages' 
+    git commit -m 'publishing to gh-pages'
     echo_green "Status 3:"
     git status
     git push
