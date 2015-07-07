@@ -1,6 +1,6 @@
 //This is a toy component to demonstrate how to make them
 
-angular.module('todo', ['fsapi']);
+angular.module('todo', ['qfapi']);
 
 angular.module('todo').factory('TODOModel', function(FSApi){
     var m = {

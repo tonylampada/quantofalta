@@ -4,7 +4,7 @@
 		'ui.router',
 		'fsngutils',
 		'quantofalta',
-		'fsapi',
+		'qfapi',
 	];
 	if(FS.USE_TEAMPLE_CACHE){
 		deps.push('fstemplates');

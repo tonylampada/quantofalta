@@ -1,4 +1,4 @@
-angular.module('fsauth', ['fsapi']);
+angular.module('fsauth', ['qfapi']);
 
 angular.module('fsauth').factory('FSAuth', function(FSApi){
 	var auth = {

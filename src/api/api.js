@@ -1,11 +1,6 @@
-angular.module('fsapi', []);
-angular.module('fsapi').factory('FSApi', function($q, $timeout, $log){
+angular.module('qfapi', []);
+angular.module('qfapi').factory('qfapi', function($q, $timeout, $log){
 	var fsapi = {
-		add: todo,
-		login: todo,
-		logout: todo,
-		whoami: todo,
-		get_user_details: todo,
 	};
 
 	function todo(){}

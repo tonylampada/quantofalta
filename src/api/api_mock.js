@@ -1,58 +1,7 @@
-angular.module('fsapi', []);
-angular.module('fsapi').factory('FSApi', function($q, $timeout, $log){
+angular.module('qfapi', []);
+angular.module('qfapi').factory('qfapi', function($q, $timeout, $log){
 	var fsapi = {
-		add: _mockasync(add),
-		login: _mockasync(login),
-		logout: _mockasync(logout),
-		whoami: _mockasync(whoami),
-		get_user_details: _mockasync(get_user_details),
 	};
-
-	var who = {
-		authenticated: true,
-		user: {
-			username: 'johndoe',
-			name: 'Fake User',
-		},
-	};
-
-	function add(todo){
-		var newtodo = angular.copy(todo);
-		newtodo.id = Math.floor(Math.random() * 1E9);
-		return newtodo;
-	}
-
-	function login(username, password){
-		var fakeuser = {
-			username: username,
-			name: 'Fake User',
-		};
-		who = {
-			authenticated: true,
-			user: fakeuser,
-		};
-		return fakeuser;
-	}
-
-	function logout(){
-		who = {
-			authenticated: false
-		};
-	}
-
-	function whoami(){
-		return who;
-	}
-
-	function get_user_details(username){
-		var fakeuser = {
-			username: username,
-			name: 'Fake User',
-			has_paypal: true,
-			has_bitcoin: false,
-		};
-		return fakeuser;
-	}
 
 	function _mockasync(f){
 		return function(){
