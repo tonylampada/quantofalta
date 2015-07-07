@@ -4,6 +4,9 @@ angular.module('quantofalta').factory('QFModel', function(){
     var s = localStorage.getItem('quantofalta');
     var m = s ? JSON.parse(s) : {
         saldoinicial: '',
+        fechamento_fatura: '1',
+        fatura_fechada: '',
+        fatura_paga: false,
         custofixo: '',
         parcelado_restante: '',
         lim_total: '',
@@ -12,6 +15,7 @@ angular.module('quantofalta').factory('QFModel', function(){
         novogasto: '',
         novovalor: '',
     };
+    window.m = m;
 
     angular.extend(m, {
         proxima_fatura: proxima_fatura,
@@ -21,16 +25,31 @@ angular.module('quantofalta').factory('QFModel', function(){
         save: save,
     });
 
+    function _this_day(){
+        return new Date().getDate();
+    }
+
     function proxima_fatura(){
-        return m.lim_total - m.parcelado_restante - m.lim_atual;
+        var prox_fatura = m.lim_total - m.parcelado_restante - m.lim_atual;
+        if(_this_day() > m.fechamento_fatura && !m.fatura_paga){
+            prox_fatura -= m.fatura_fechada;
+        }
+        return prox_fatura;
     }
 
     function disponivel(){
         var somagastos = 0;
         m.gastos.map(function(g){
             somagastos += g.valor;
-        })
-        return m.saldoinicial - m.custofixo - m.proxima_fatura() - somagastos;
+        });
+        var disp = m.saldoinicial - m.custofixo - somagastos;
+
+        if(_this_day() > m.fechamento_fatura){
+            disp -= m.fatura_fechada;
+        } else {
+            disp -= m.proxima_fatura();
+        }
+        return disp;
     }
 
     function add_gasto(){

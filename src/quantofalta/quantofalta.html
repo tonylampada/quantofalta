@@ -12,6 +12,15 @@
         <label>Saldo inicial</label>
         <input type="number" ng-change="m.save()" ng-model="m.saldoinicial">
     </md-input-container>
+    <md-input-container layout="row">
+        <label>Dia do fechamento da fatura</label>
+        <input type="number" ng-change="m.save()" ng-model="m.fechamento_fatura">
+        <input type="checkbox" ng-change="m.save()" ng-model="m.fatura_paga">
+    </md-input-container>
+    <md-input-container>
+        <label>Fatura fechada desse mes</label>
+        <input type="number" ng-change="m.save()" ng-model="m.fatura_fechada">
+    </md-input-container>
     <md-input-container>
         <label>Custo fixo previsto</label>
         <input type="number" ng-change="m.save()" ng-model="m.custofixo">
