@@ -1,60 +1,105 @@
-<div layout="column">
-    <md-list>
-        <md-list-item><label>Disponivel nesse mes: {{m.disponivel()}}</label></md-list-item>
-        <md-list-item><label>Proxima fatura: {{m.proxima_fatura()}}</label></md-list-item>
-    </md-list>
-    <md-divider></md-divider>
-    <md-input-container>
-        <label>Limite atual</label>
-        <input type="number" ng-change="m.save()" ng-model="m.lim_atual">
-    </md-input-container>
-    <md-input-container>
-        <label>Saldo inicial</label>
-        <input type="number" ng-change="m.save()" ng-model="m.saldoinicial">
-    </md-input-container>
-    <div layout="row">
-        <md-input-container>
-            <label>Dia do fechamento da fatura</label>
-            <input type="number" ng-change="m.save()" ng-model="m.fechamento_fatura">
-        </md-input-container>
-        <md-input-container>
-            <input type="checkbox" ng-change="m.save()" ng-model="m.fatura_paga">
-            <label>Pago</label>
-        </md-input-container>
-    </div>
-    <md-input-container>
-        <label>Fatura fechada desse mes</label>
-        <input type="number" ng-change="m.save()" ng-model="m.fatura_fechada">
-    </md-input-container>
-    <md-input-container>
-        <label>Custo fixo previsto</label>
-        <input type="number" ng-change="m.save()" ng-model="m.custofixo">
-    </md-input-container>
-    <md-input-container>
-        <label>Limite total</label>
-        <input type="number" ng-change="m.save()" ng-model="m.lim_total">
-    </md-input-container>
-    <md-input-container>
-        <label>Parcelado restante</label>
-        <input type="number" ng-change="m.save()" ng-model="m.parcelado_restante">
-    </md-input-container>
-    <div layout="row">
-        <md-input-container>
-            <label>Novo gasto</label>
-            <input ng-model="m.novogasto">
-        </md-input-container>
-        <md-input-container>
-            <label>Valor</label>
-            <input type="number" ng-model="m.novovalor">
-        </md-input-container>
-        <md-button ng-click="m.add_gasto()" class="md-raised md-primary">+</md-button>
-    </div>
-    <md-list>
-        <md-list-item ng-repeat="g in m.gastos">
-            <span>{{g.descricao}}</span>
-            <span flex></span>
-            <span>{{g.valor}}</span>
-            <md-button ng-click="m.remove_gasto(g)" class="md-raised">-<md-raised>
-        </md-list-item>
-    </md-list>
+<div layout="column" flex style="height: 100%">
+    <md-tabs flex md-border-bottom md-autoselect>
+        <md-tab label="Now" layout="column">
+            <h4>Resumo</h4>
+            <md-list>
+                <md-list-item><label>Disponivel nesse mes / dias faltando: {{m.disponivel()}} / {{m.dias_ate_pagamento()}}</label></md-list-item>
+                <md-list-item><label>Custo fixo (pago/total): {{m.fixo_pago()}} / {{m.fixo()}}</label></md-list-item>
+                <md-list-item>
+                    <label>Proxima fatura:
+                        <span class="{{m.proxima_fatura() > m.meta_fatura_hoje() ? 'mau' : 'bom'}}">{{m.proxima_fatura()}}</span> /
+                        <span>{{m.meta_fatura_hoje() | number : 0}}</span>
+                    </label>
+                </md-list-item>
+                <md-list-item><label>Saldo estimado: {{m.saldo_estimado()}}</label></md-list-item>
+            </md-list>
+            <md-divider></md-divider>
+            <h4>Conta corrente</h4>
+            <md-container layout="row">
+                <md-input-container>
+                    <label>Saldo inicial</label>
+                    <input type="number" ng-change="m.save()" ng-model="m.saldoinicial">
+                </md-input-container>
+                <md-input-container>
+                    <label>Dia pagamento</label>
+                    <input type="number" ng-change="m.save()" ng-model="m.dia_pagamento">
+                </md-input-container>
+            </md-container>
+            <h4>Fatura</h4>
+            <md-container layout="row">
+                <md-input-container>
+                    <label>Limite atual</label>
+                    <input type="number" ng-change="m.save()" ng-model="m.lim_atual">
+                </md-input-container>
+                <md-input-container>
+                    <label>Limite total</label>
+                    <input type="number" ng-change="m.save()" ng-model="m.lim_total">
+                </md-input-container>
+                <md-input-container>
+                    <label>Fechamento</label>
+                    <input type="number" ng-change="m.save()" ng-model="m.fechamento_fatura">
+                </md-input-container>
+                <md-input-container>
+                    <label>Parcelado restante</label>
+                    <input type="number" ng-change="m.save()" ng-model="m.parcelado_restante">
+                </md-input-container>
+            </md-container>
+            <md-container layout="row">
+                <md-input-container>
+                    <label>Meta</label>
+                    <input type="number" ng-change="m.save()" ng-model="m.meta_fatura">
+                </md-input-container>
+                <md-input-container>
+                    <label>Fatura fechada</label>
+                    <input type="number" ng-change="m.save()" ng-model="m.fatura_fechada">
+                </md-input-container>
+                <md-input-container>
+                    <input type="checkbox" ng-change="m.save()" ng-model="m.fatura_paga">
+                    <label>Pago</label>
+                </md-input-container>
+            </md-container>
+
+            <div layout="row">
+                <md-input-container>
+                    <label>Novo gasto</label>
+                    <input ng-model="m.novogasto">
+                </md-input-container>
+                <md-input-container>
+                    <label>Valor</label>
+                    <input type="number" ng-model="m.novovalor">
+                </md-input-container>
+                <md-button ng-click="m.add_gasto()" class="md-raised md-primary">+</md-button>
+            </div>
+            <md-list>
+                <md-list-item ng-repeat="g in m.gastos">
+                    <span>{{g.descricao}}</span>
+                    <span flex></span>
+                    <span>{{g.valor}}</span>
+                    <md-button ng-click="m.remove_gasto(g)" class="md-raised">-<md-raised>
+                </md-list-item>
+            </md-list>
+        </md-tab>
+        <md-tab label="Fixo">
+            <md-list>
+                <md-list-item><label>Custo fixo: {{m.fixo()}}</label></md-list-item>
+            </md-list>
+            <div layout="row">
+                <md-input-container>
+                    <label>Novo Fixo</label>
+                    <input ng-model="m.novofixo">
+                </md-input-container>
+                <md-button ng-click="m.add_fixo()" class="md-raised md-primary">+</md-button>
+            </div>
+            <md-container layout="row" ng-repeat="f in m.fixos">
+                <md-input-container>
+                    <label>{{f.descricao}}</label>
+                    <input type="number" ng-change="m.save()" ng-model="f.valor">
+                </md-input-container>
+                <md-input-container>
+                    <input type="checkbox" ng-change="m.save()" ng-model="f.pago">
+                </md-input-container>
+                <md-button ng-click="m.remove_fixo(f)" class="md-raised">-<md-raised>
+            </md-container>
+        </md-tab>
+    </md-tabs>
 </div>
