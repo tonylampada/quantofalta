@@ -1,6 +1,6 @@
 angular.module("fstemplates", []).run(["$templateCache", function($templateCache) {$templateCache.put("TEMPLATE_CACHE/pages/docs.html","<html><head><meta name=\"viewport\" content=\"initial-scale=1\"><link rel=\"stylesheet\" href=\"./css/lib.css\"><link rel=\"stylesheet\" href=\"./css/fs.css\"><link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,400italic\"><link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/icon?family=Material+Icons\"><script src=\"./js/lib.js\"></script><!--FSJS--><!--FSJS END--><script>DOCS.angular_dependencies = [\'fsdocs\'];\n            FSDOCS.angular_dependencies = [];\n            if(FS.USE_TEAMPLE_CACHE){\n                DOCS.angular_dependencies.push(\'fstemplates\');\n                DOCS.angular_dependencies.push(\'docstemplates\');\n            }</script><!--DOCSJS--><!--DOCSJS END--><!--FSDOCSJS--><!--FSDOCSJS END--><script>angular.module(\'fsdocs\', FSDOCS.angular_dependencies);</script></head><body ng-app=\"docs_main\" layout=\"column\"><div layout=\"row\" flex><md-sidenav layout=\"column\" class=\"md-sidenav-left md-whiteframe-z2\" md-component-id=\"left\" md-is-locked-open=\"true\"><component-catalog-tree group=\"fs\"></component-catalog-tree></md-sidenav><div layout=\"column\" flex id=\"content\"><div ui-view></div></div></div></body></html>");
 $templateCache.put("TEMPLATE_CACHE/pages/index.html","<html manifest=\"cache.manifest\"><head><meta name=\"viewport\" content=\"initial-scale=1\"><link rel=\"stylesheet\" href=\"./css/lib.css\"><link rel=\"stylesheet\" href=\"./css/fs.css\"><link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,400italic\"><script src=\"./js/lib.js\"></script><!--FSJS--><!--FSJS END--></head><body ng-app=\"main\"><quantofalta></quantofalta></body></html>");
-$templateCache.put("TEMPLATE_CACHE/quantofalta/quantofalta.html","<div layout=\"column\" flex style=\"height: 100%\"><md-tabs flex md-border-bottom md-autoselect><md-tab label=\"Now\" layout=\"column\"><md-list><md-list-item><label>Disponivel nesse mes: {{m.disponivel()}}</label></md-list-item><md-list-item><label>Custo fixo: {{m.fixo()}}</label></md-list-item><md-list-item><label>Proxima fatura: {{m.proxima_fatura()}}</label></md-list-item></md-list><md-divider></md-divider><md-input-container><label>Limite atual</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.lim_atual\"></md-input-container><md-input-container><label>Saldo inicial</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.saldoinicial\"></md-input-container><md-container layout=\"row\"><md-input-container><label>Dia do fechamento da fatura</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.fechamento_fatura\"></md-input-container><md-input-container><input type=\"checkbox\" ng-change=\"m.save()\" ng-model=\"m.fatura_paga\"><label>Pago</label></md-input-container></md-container><md-input-container><label>Fatura fechada desse mes</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.fatura_fechada\"></md-input-container><md-input-container><label>Limite total</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.lim_total\"></md-input-container><md-input-container><label>Parcelado restante</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.parcelado_restante\"></md-input-container><div layout=\"row\"><md-input-container><label>Novo gasto</label><input ng-model=\"m.novogasto\"></md-input-container><md-input-container><label>Valor</label><input type=\"number\" ng-model=\"m.novovalor\"></md-input-container><md-button ng-click=\"m.add_gasto()\" class=\"md-raised md-primary\">+</md-button></div><md-list><md-list-item ng-repeat=\"g in m.gastos\"><span>{{g.descricao}}</span> <span flex></span> <span>{{g.valor}}</span><md-button ng-click=\"m.remove_gasto(g)\" class=\"md-raised\">-<md-raised></md-raised></md-button></md-list-item></md-list></md-tab><md-tab label=\"Fixo\"><md-list><md-list-item><label>Custo fixo: {{m.fixo()}}</label></md-list-item></md-list><div layout=\"row\"><md-input-container><label>Novo Fixo</label><input ng-model=\"m.novofixo\"></md-input-container><md-button ng-click=\"m.add_fixo()\" class=\"md-raised md-primary\">+</md-button></div><md-container layout=\"row\" ng-repeat=\"f in m.fixos\"><md-input-container><label>{{f.descricao}}</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"f.valor\"></md-input-container><md-input-container><input type=\"checkbox\" ng-change=\"m.save()\" ng-model=\"f.pago\"></md-input-container><md-button ng-click=\"m.remove_fixo(f)\" class=\"md-raised\">-<md-raised></md-raised></md-button></md-container></md-tab></md-tabs></div>");}]);
+$templateCache.put("TEMPLATE_CACHE/quantofalta/quantofalta.html","<div layout=\"column\" flex style=\"height: 100%\"><md-tabs flex md-border-bottom md-autoselect><md-tab label=\"Now\" layout=\"column\"><h4>Resumo</h4><div layout=\"column\"><div layout=\"row\" layout-margin><div flex>$disp/dias faltando:</div><div layout-margin>{{m.disponivel()}} / {{m.dias_ate_pagamento()}}</div></div><div layout=\"row\" layout-margin><div flex>Custo fixo (pago/total):</div><div layout-padding>{{m.fixo_pago()}} / {{m.fixo()}}</div></div><div layout=\"row\" layout-margin><div flex>Proxima fatura:</div><div layout-padding><span class=\"{{m.proxima_fatura() > m.meta_fatura_hoje() ? \'mau\' : \'bom\'}}\">{{m.proxima_fatura()}}</span> / {{m.meta_fatura_hoje() | number : 0}}</div></div><div layout=\"row\" layout-margin><div flex>Saldo estimado:</div><div layout-padding>{{m.saldo_estimado()}}</div></div></div><md-divider></md-divider><h4>Fatura</h4><md-container layout=\"row\"><md-input-container><label>Limite atual</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.lim_atual\"></md-input-container><md-input-container><label>Limite total</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.lim_total\"></md-input-container><md-input-container><label>Fechamento</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.fechamento_fatura\"></md-input-container><md-input-container><label>Parcelado restante</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.parcelado_restante\"></md-input-container></md-container><md-container layout=\"row\"><md-input-container><label>Meta</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.meta_fatura\"></md-input-container><md-input-container><label>Fatura fechada</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.fatura_fechada\"></md-input-container><md-input-container><input type=\"checkbox\" ng-change=\"m.save()\" ng-model=\"m.fatura_paga\"><label>Pago</label></md-input-container></md-container><h4>Conta corrente</h4><md-container layout=\"row\"><md-input-container><label>Saldo inicial</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.saldoinicial\"></md-input-container><md-input-container><label>Dia pagamento</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.dia_pagamento\"></md-input-container></md-container><div layout=\"row\"><md-input-container><label>Novo gasto</label><input ng-model=\"m.novogasto\"></md-input-container><md-input-container><label>Valor</label><input type=\"number\" ng-model=\"m.novovalor\"></md-input-container><md-button ng-click=\"m.add_gasto()\" class=\"md-raised md-primary\">+</md-button></div><md-list><md-list-item ng-repeat=\"g in m.gastos\"><span>{{g.descricao}}</span> <span flex></span> <span>{{g.valor}}</span><md-button ng-click=\"m.remove_gasto(g)\" class=\"md-raised\">-<md-raised></md-raised></md-button></md-list-item></md-list></md-tab><md-tab label=\"Fixo\"><md-list><md-list-item><label>Custo fixo: {{m.fixo()}}</label></md-list-item></md-list><div layout=\"row\"><md-input-container><label>Novo Fixo</label><input ng-model=\"m.novofixo\"></md-input-container><md-button ng-click=\"m.add_fixo()\" class=\"md-raised md-primary\">+</md-button></div><md-container layout=\"row\" ng-repeat=\"f in m.fixos\"><md-input-container><label>{{f.descricao}}</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"f.valor\"></md-input-container><md-input-container><input type=\"checkbox\" ng-change=\"m.save()\" ng-model=\"f.pago\"></md-input-container><md-button ng-click=\"m.remove_fixo(f)\" class=\"md-raised\">-<md-raised></md-raised></md-button></md-container></md-tab></md-tabs></div>");}]);
 if(!window.FS){
     window.FS = {};
 }
@@ -108,11 +108,14 @@ window.addEventListener('load', function(e) {
 angular.module('quantofalta', []);
 
 angular.module('quantofalta').factory('QFModel', function(){
+    var _1diamilis = 24*60*60*1000;
     var s = localStorage.getItem('quantofalta');
     var m = s ? angular.fromJson(s) : {
         saldoinicial: '',
         fechamento_fatura: '1',
         fatura_fechada: '',
+        dia_pagamento: '1',
+        meta_fatura: '',
         fatura_paga: false,
         // custofixo: '',
         parcelado_restante: '',
@@ -128,8 +131,12 @@ angular.module('quantofalta').factory('QFModel', function(){
 
     angular.extend(m, {
         proxima_fatura: proxima_fatura,
+        meta_fatura_hoje: meta_fatura_hoje,
+        dias_ate_pagamento: dias_ate_pagamento,
         disponivel: disponivel,
+        saldo_estimado: saldo_estimado,
         fixo: fixo,
+        fixo_pago: fixo_pago,
         add_gasto: add_gasto,
         remove_gasto: remove_gasto,
         add_fixo: add_fixo,
@@ -141,6 +148,30 @@ angular.module('quantofalta').factory('QFModel', function(){
         return new Date().getDate();
     }
 
+    function _venc_prox_fatura(){
+        var today = new Date();
+        if(_this_day() < m.fechamento_fatura){
+            return new Date(1900 + today.getYear(), today.getMonth(), m.fechamento_fatura);
+        } else {
+            return new Date(1900 + today.getYear(), today.getMonth()+1, m.fechamento_fatura);
+        }
+    }
+
+    function _prox_pagamento(){
+        var today = new Date();
+        if(_this_day() < m.dia_pagamento){
+            return new Date(1900 + today.getYear(), today.getMonth(), m.dia_pagamento);
+        } else {
+            return new Date(1900 + today.getYear(), today.getMonth()+1, m.dia_pagamento);
+        }
+    }
+
+    function _venc_fatura_anterior(){
+        var venc_fatura = _venc_prox_fatura();
+        var venc_anterior = new Date(1900 + venc_fatura.getYear(), venc_fatura.getMonth() - 1, venc_fatura.getDate());
+        return venc_anterior;
+    }
+
     function proxima_fatura(){
         var prox_fatura = m.lim_total - m.parcelado_restante - m.lim_atual;
         if(_this_day() > m.fechamento_fatura && !m.fatura_paga){
@@ -149,12 +180,33 @@ angular.module('quantofalta').factory('QFModel', function(){
         return prox_fatura;
     }
 
-    function disponivel(){
+    function meta_fatura_hoje(){
+        var today = new Date();
+        var venc_fatura = _venc_prox_fatura();
+        var venc_fatura_anterior = _venc_fatura_anterior();
+        var dias_ate_venc = Math.ceil((venc_fatura - today)/_1diamilis);
+        var dias_totais = Math.ceil((venc_fatura - venc_fatura_anterior)/_1diamilis);
+        var meta = ((dias_totais - dias_ate_venc)/dias_totais) * m.meta_fatura;
+        return meta;
+    }
+
+    function dias_ate_pagamento(){
+        var today = new Date();
+        var dia_pagamento = _prox_pagamento();
+        var dias_ate_pag = Math.ceil((dia_pagamento - today)/_1diamilis);
+        return dias_ate_pag;
+    }
+
+    function _soma_gastos(){
         var somagastos = 0;
         m.gastos.map(function(g){
             somagastos += g.valor;
         });
-        var disp = m.saldoinicial - m.fixo() - somagastos;
+        return somagastos;
+    }
+
+    function disponivel(){
+        var disp = m.saldoinicial - m.fixo() - _soma_gastos();
 
         if(_this_day() > m.fechamento_fatura){
             disp -= m.fatura_fechada;
@@ -164,10 +216,28 @@ angular.module('quantofalta').factory('QFModel', function(){
         return disp;
     }
 
+    function saldo_estimado(){
+        var saldo = m.saldoinicial - m.fixo_pago() - _soma_gastos();
+        if(m.fatura_paga){
+            saldo -= m.fatura_fechada;
+        }
+        return saldo;
+    }
+
     function fixo(){
         var soma = 0;
         m.fixos.map(function(f){
             soma += f.valor;
+        });
+        return soma;
+    }
+
+    function fixo_pago(){
+        var soma = 0;
+        m.fixos.map(function(f){
+            if(f.pago){
+                soma += f.valor;
+            }
         });
         return soma;
     }

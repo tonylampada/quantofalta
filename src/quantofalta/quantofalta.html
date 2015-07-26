@@ -2,29 +2,25 @@
     <md-tabs flex md-border-bottom md-autoselect>
         <md-tab label="Now" layout="column">
             <h4>Resumo</h4>
-            <md-list>
-                <md-list-item><label>Disponivel nesse mes / dias faltando: {{m.disponivel()}} / {{m.dias_ate_pagamento()}}</label></md-list-item>
-                <md-list-item><label>Custo fixo (pago/total): {{m.fixo_pago()}} / {{m.fixo()}}</label></md-list-item>
-                <md-list-item>
-                    <label>Proxima fatura:
-                        <span class="{{m.proxima_fatura() > m.meta_fatura_hoje() ? 'mau' : 'bom'}}">{{m.proxima_fatura()}}</span> /
-                        <span>{{m.meta_fatura_hoje() | number : 0}}</span>
-                    </label>
-                </md-list-item>
-                <md-list-item><label>Saldo estimado: {{m.saldo_estimado()}}</label></md-list-item>
-            </md-list>
+            <div layout="column">
+                <div layout="row" layout-margin>
+                    <div flex>$disp/dias faltando:</div>
+                    <div layout-margin>{{m.disponivel()}} / {{m.dias_ate_pagamento()}}</div>
+                </div>
+                <div layout="row" layout-margin>
+                    <div flex>Custo fixo (pago/total):</div>
+                    <div layout-padding>{{m.fixo_pago()}} / {{m.fixo()}}</div>
+                </div>
+                <div layout="row" layout-margin>
+                    <div flex>Proxima fatura:</div>
+                    <div layout-padding><span class="{{m.proxima_fatura() > m.meta_fatura_hoje() ? 'mau' : 'bom'}}">{{m.proxima_fatura()}}</span> / {{m.meta_fatura_hoje() | number : 0}}</div>
+                </div>
+                <div layout="row" layout-margin>
+                    <div flex>Saldo estimado:</div>
+                    <div layout-padding>{{m.saldo_estimado()}}</div>
+                </div>
+            </div>
             <md-divider></md-divider>
-            <h4>Conta corrente</h4>
-            <md-container layout="row">
-                <md-input-container>
-                    <label>Saldo inicial</label>
-                    <input type="number" ng-change="m.save()" ng-model="m.saldoinicial">
-                </md-input-container>
-                <md-input-container>
-                    <label>Dia pagamento</label>
-                    <input type="number" ng-change="m.save()" ng-model="m.dia_pagamento">
-                </md-input-container>
-            </md-container>
             <h4>Fatura</h4>
             <md-container layout="row">
                 <md-input-container>
@@ -58,7 +54,17 @@
                     <label>Pago</label>
                 </md-input-container>
             </md-container>
-
+            <h4>Conta corrente</h4>
+            <md-container layout="row">
+                <md-input-container>
+                    <label>Saldo inicial</label>
+                    <input type="number" ng-change="m.save()" ng-model="m.saldoinicial">
+                </md-input-container>
+                <md-input-container>
+                    <label>Dia pagamento</label>
+                    <input type="number" ng-change="m.save()" ng-model="m.dia_pagamento">
+                </md-input-container>
+            </md-container>
             <div layout="row">
                 <md-input-container>
                     <label>Novo gasto</label>
