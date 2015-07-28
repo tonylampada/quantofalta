@@ -184,3 +184,11 @@ angular.module('quantofalta').directive('quantofalta', function(){
 		}
 	};
 });
+
+angular.module('quantofalta').controller('NowCtrl', function($scope, QFModel){
+    $scope.m = QFModel;
+});
+
+angular.module('quantofalta').controller('FixoCtrl', function($scope, QFModel){
+    $scope.m = QFModel;
+});

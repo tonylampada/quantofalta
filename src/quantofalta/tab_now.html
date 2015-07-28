@@ -1,0 +1,72 @@
+<ion-view view-title="Now">
+  <ion-content class="padding">
+    <div class="list card">
+        <div class="item item-divider">Resumo</div>
+
+        <div class="item item-body row">
+            <div class="col">$disp/dias faltando:</div>
+            <div class="col u-align-right">{{m.disponivel()}} / {{m.dias_ate_pagamento()}}</div>
+        </div>
+        <div class="item item-body row">
+            <div class="col">Custo fixo (pago/total):</div>
+            <div class="col u-align-right">{{m.fixo_pago()}} / {{m.fixo()}}</div>
+        </div>
+        <div class="item item-body row">
+            <div class="col">Proxima fatura:</div>
+            <div class="col u-align-right"><span class="{{m.proxima_fatura() > m.meta_fatura_hoje() ? 'mau' : 'bom'}}">{{m.proxima_fatura()}}</span> / {{m.meta_fatura_hoje() | number : 0}}</div>
+        </div>
+        <div class="item item-body row">
+            <div class="col">Saldo estimado:</div>
+            <div class="col u-align-right">{{m.saldo_estimado()}}</div>
+        </div>
+    </div>
+    <div class="list card">
+        <div class="item item-divider">Fatura</div>
+        <div class="item item-body row">
+            <label class="col item item-input">
+                <span class="input-label">Lim. atual</span>
+                <input type="number" ng-change="m.save()" ng-model="m.lim_atual">
+            </label>
+            <label class="col item item-input">
+                <span class="input-label">Lim. total</span>
+                <input type="number" ng-change="m.save()" ng-model="m.lim_total">
+            </label>
+        </div>
+        <div class="item item-body row">
+            <label class="col item item-input">
+                <span class="input-label">Fechamento</span>
+                <input type="number" ng-change="m.save()" ng-model="m.fechamento_fatura">
+            </label>
+            <label class="col item item-input">
+                <span class="input-label">Parcelado restante</span>
+                <input type="number" ng-change="m.save()" ng-model="m.parcelado_restante">
+            </label>
+        </div>
+        <div class="item item-body row">
+            <label class="col item item-input">
+                <span class="input-label">Fatura fechada</span>
+                <input type="number" ng-change="m.save()" ng-model="m.fatura_fechada">
+            </label>
+            <div class="col">
+                <ion-toggle ng-change="m.save()" ng-model="m.fatura_paga">
+                    Pago
+                </ion-toggle>
+            </div>
+        </div>
+        <div class="item item-body row">
+            <label class="col item item-input">
+                <span class="input-label">Meta</span>
+                <input type="number" ng-change="m.save()" ng-model="m.meta_fatura">
+            </label>
+        </div>
+    </div>
+    <div class="list card">
+        <div class="item item-divider">Conta corrente</div>
+        <div class="item item-body">
+            <div>
+                You have <b>29</b> meetings on your calendar tomorrow.
+            </div>
+        </div>
+    </div>
+  </ion-content>
+</ion-view>

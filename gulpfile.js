@@ -73,8 +73,11 @@ var lib = {
         './lib/angular-1.4.0/angular.js',
         './lib/angular-1.4.0/angular-aria.js',
         './lib/angular-1.4.0/angular-animate.js',
-        './lib/angular-material-0.9.8/angular-material.js',
+        './lib/angular-1.4.0/angular-sanitize.js',
         './lib/angular-ui-router-0.2.15/angular-ui-router.js',
+        './lib/ionic/js/ionic.js',
+        './lib/ionic/js/ionic-angular.js',
+//        './lib/angular-material-0.9.8/angular-material.js',
     ],
     jsmin: [
         './lib/angular-1.4.0/angular.min.js',
@@ -83,8 +86,14 @@ var lib = {
         './lib/angular-material-0.9.8/angular-material.min.js',
         './lib/angular-ui-router-0.2.15/angular-ui-router.min.js',
     ],
-    css: ['./lib/angular-material-0.9.8/angular-material.css'],
+    css: [
+        './lib/angular-material-0.9.8/angular-material.css',
+        './lib/ionic/css/ionic.css',
+    ],
     cssmin: ['./lib/angular-material-0.9.8/angular-material.min.css'],
+    tocopy: [
+        './lib/ionic/fonts/**',
+    ],
 }
 
 var testlib = {
@@ -98,7 +107,7 @@ var testlib = {
 
 ////////// Big tasks
 
-var commontasks = ['concatjslib', 'concatjslibmin', 'concatcsslib', 'concatcsslibmin', 'sass'];
+var commontasks = ['concatjslib', 'concatjslibmin', 'concatcsslib', 'concatcsslibmin', 'sass', 'copylibfiles'];
 var concatjstasks = ['concatjsfs', 'concatjsfsdocs', 'concatjsdocs']
 gulp.task('dev', commontasks.concat(['linkjsdev']));
 gulp.task('prod', commontasks.concat(concatjstasks).concat(['copydocssamples', 'linkjsprod']));
@@ -108,6 +117,7 @@ concattask('concatjslib', {src: lib.js, dest: 'lib.js'});
 concattask('concatjslibmin', {src: lib.jsmin, dest: 'lib.min.js'});
 concattask('concatcsslib', {src: lib.css, dest: '../css/lib.css'});
 concattask('concatcsslibmin', {src: lib.cssmin, dest: '../css/lib.min.css'});
+copytask('copylibfiles', lib.tocopy, '', {prefix: 2});
 jshinttask('jshintall')
 sasstask('sass');
 
