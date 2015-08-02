@@ -41,6 +41,10 @@ angular.module('quantofalta').factory('QFModel', function(){
         return new Date().getDate();
     }
 
+    function _ja_fechou_fatura(){
+        return _this_day() > m.fechamento_fatura || _this_day() <= m.dia_pagamento;
+    }
+
     function _venc_prox_fatura(){
         var today = new Date();
         if(_this_day() < m.fechamento_fatura){
@@ -67,7 +71,7 @@ angular.module('quantofalta').factory('QFModel', function(){
 
     function proxima_fatura(){
         var prox_fatura = m.lim_total - m.parcelado_restante - m.lim_atual;
-        if(_this_day() > m.fechamento_fatura && !m.fatura_paga){
+        if(_ja_fechou_fatura() && !m.fatura_paga){
             prox_fatura -= m.fatura_fechada;
         }
         return prox_fatura;
@@ -101,7 +105,7 @@ angular.module('quantofalta').factory('QFModel', function(){
     function disponivel(){
         var disp = m.saldoinicial - m.fixo() - _soma_gastos();
 
-        if(_this_day() > m.fechamento_fatura){
+        if(_ja_fechou_fatura()){
             disp -= m.fatura_fechada;
         } else {
             disp -= m.proxima_fatura();
