@@ -1,3 +1,7 @@
+input[type='checkbox'] {
+  width: 2em;
+  height: 2em; }
+
 .u-align-right {
   text-align: right; }
 
@@ -6,3 +10,6 @@
 
 .mau {
   color: red; }
+
+.gridrow {
+  border-top: solid; }

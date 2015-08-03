@@ -81,7 +81,9 @@ function updatemobile {
     CD=$(pwd)
     cd $FS
     prodmock
-    cp -Rf dist/js dist/css quantofalta/www
+    cd $FS
+    pwd
+    cp -Rf dist/js dist/css dist/fonts quantofalta/www
     cd $CD
 }
 

@@ -77,7 +77,7 @@ var lib = {
         './lib/angular-ui-router-0.2.15/angular-ui-router.js',
         './lib/ionic/js/ionic.js',
         './lib/ionic/js/ionic-angular.js',
-//        './lib/angular-material-0.9.8/angular-material.js',
+        './lib/angular-material-0.9.8/angular-material.js',
     ],
     jsmin: [
         './lib/angular-1.4.0/angular.min.js',
@@ -87,7 +87,7 @@ var lib = {
         './lib/angular-ui-router-0.2.15/angular-ui-router.min.js',
     ],
     css: [
-        './lib/angular-material-0.9.8/angular-material.css',
+        // './lib/angular-material-0.9.8/angular-material.css',
         './lib/ionic/css/ionic.css',
     ],
     cssmin: ['./lib/angular-material-0.9.8/angular-material.min.css'],
@@ -113,10 +113,10 @@ gulp.task('dev', commontasks.concat(['linkjsdev']));
 gulp.task('prod', commontasks.concat(concatjstasks).concat(['copydocssamples', 'linkjsprod']));
 
 ////////// Common tasks
-concattask('concatjslib', {src: lib.js, dest: 'lib.js'});
-concattask('concatjslibmin', {src: lib.jsmin, dest: 'lib.min.js'});
-concattask('concatcsslib', {src: lib.css, dest: '../css/lib.css'});
-concattask('concatcsslibmin', {src: lib.cssmin, dest: '../css/lib.min.css'});
+concattask('concatjslib', {src: lib.js, dest: 'js/lib.js'});
+concattask('concatjslibmin', {src: lib.jsmin, dest: 'js/lib.min.js'});
+concattask('concatcsslib', {src: lib.css, dest: 'css/lib.css'});
+concattask('concatcsslibmin', {src: lib.cssmin, dest: 'css/lib.min.css'});
 copytask('copylibfiles', lib.tocopy, '', {prefix: 2});
 jshinttask('jshintall')
 sasstask('sass');
@@ -127,9 +127,9 @@ webservertask('runserver');
 jstesttask('test')
 
 ////////// Prod tasks
-concattask('concatjsfs', {src: fs.js('prod'), html: fs.html, ngmodule: 'fstemplates', tmplprefix: 'TEMPLATE_CACHE/', dest: 'fs.js'});
-concattask('concatjsfsdocs', {src: fsdocs.js, dest: 'fsdocs.js'});
-concattask('concatjsdocs', {src: docs.js, html: docs.html, ngmodule: 'docstemplates', tmplprefix: 'TEMPLATE_CACHE/', dest: 'docs.js'});
+concattask('concatjsfs', {src: fs.js('prod'), html: fs.html, ngmodule: 'fstemplates', tmplprefix: 'TEMPLATE_CACHE/', dest: 'js/fs.js'});
+concattask('concatjsfsdocs', {src: fsdocs.js, dest: 'js/fsdocs.js'});
+concattask('concatjsdocs', {src: docs.js, html: docs.html, ngmodule: 'docstemplates', tmplprefix: 'TEMPLATE_CACHE/', dest: 'js/docs.js'});
 copytask('copydocssamples', fsdocs.samples, 'docs_samples/', {prefix: 1});
 linktaskprod('linkjsprod');
 
@@ -156,7 +156,7 @@ function concattask(id, options){
             stream_concat = stream_concat.pipe(concat(options.dest))
         }
         return stream_concat
-            .pipe(gulp.dest('./dist/js/'));
+            .pipe(gulp.dest('./dist/'));
     });
 }
 

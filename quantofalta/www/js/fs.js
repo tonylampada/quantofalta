@@ -300,9 +300,57 @@ window.addEventListener('load', function(e) {
 
 }, false);
 
-angular.module('quantofalta', []);
+angular.module('popup_gasto', ['ionic']);
 
-angular.module('quantofalta').factory('QFModel', function(){
+angular.module('popup_gasto').factory('GastoPopupModel', function($ionicPopup, $rootScope){
+    var m = {
+        show_date: false,
+        data: new Date(),
+        desc: '',
+        valor: '',
+    }
+
+    angular.extend(m, {
+        open: open,
+    });
+
+    function open(options){
+        m.show_date = options.show_date;
+        m.data = options.data ? new Date(options.data) : new Date();
+        m.desc = options.desc || '';
+        m.valor = options.valor || '';
+
+        return $ionicPopup.show({
+            templateUrl: FS.BASE_URL+'quantofalta/popup_gasto.html',
+            title: options.title,
+            scope: angular.extend($rootScope.$new(), {m:m}),
+            buttons: [
+                { text: 'Cancel' },
+                {
+                    text: 'OK',
+                    type: 'button-positive',
+                    onTap: function(e) {
+                        var result = {
+                            desc: m.desc,
+                            valor: m.valor,
+                        };
+                        if(options.show_date){
+                            result.data = m.data.getTime();
+                        }
+                        return result;
+                    }
+                },
+            ]
+        });
+
+    }
+
+    return m;
+});
+
+angular.module('quantofalta', ['popup_gasto']);
+
+angular.module('quantofalta').factory('QFModel', function(GastoPopupModel, $ionicPopup){
     var _1diamilis = 24*60*60*1000;
     var s = localStorage.getItem('quantofalta');
     var m = s ? angular.fromJson(s) : {
@@ -317,8 +365,6 @@ angular.module('quantofalta').factory('QFModel', function(){
         lim_total: '',
         lim_atual: '',
         gastos: [],
-        novogasto: '',
-        novovalor: '',
         fixos: [],
         novofixo: '',
     };
@@ -333,18 +379,29 @@ angular.module('quantofalta').factory('QFModel', function(){
         fixo: fixo,
         fixo_pago: fixo_pago,
         add_gasto: add_gasto,
+        edit_gasto: edit_gasto,
         remove_gasto: remove_gasto,
         add_fixo: add_fixo,
+        edit_fixo: edit_fixo,
         remove_fixo: remove_fixo,
         save: save,
+        _now: _now,
     });
 
+    function _now(){
+        return new Date();
+    }
+
     function _this_day(){
-        return new Date().getDate();
+        return m._now().getDate();
+    }
+
+    function _ja_fechou_fatura(){
+        return _this_day() > m.fechamento_fatura || _this_day() <= m.dia_pagamento;
     }
 
     function _venc_prox_fatura(){
-        var today = new Date();
+        var today = m._now();
         if(_this_day() < m.fechamento_fatura){
             return new Date(1900 + today.getYear(), today.getMonth(), m.fechamento_fatura);
         } else {
@@ -353,7 +410,7 @@ angular.module('quantofalta').factory('QFModel', function(){
     }
 
     function _prox_pagamento(){
-        var today = new Date();
+        var today = m._now();
         if(_this_day() < m.dia_pagamento){
             return new Date(1900 + today.getYear(), today.getMonth(), m.dia_pagamento);
         } else {
@@ -369,14 +426,14 @@ angular.module('quantofalta').factory('QFModel', function(){
 
     function proxima_fatura(){
         var prox_fatura = m.lim_total - m.parcelado_restante - m.lim_atual;
-        if(_this_day() > m.fechamento_fatura && !m.fatura_paga){
+        if(_ja_fechou_fatura() && !m.fatura_paga){
             prox_fatura -= m.fatura_fechada;
         }
         return prox_fatura;
     }
 
     function meta_fatura_hoje(){
-        var today = new Date();
+        var today = m._now();
         var venc_fatura = _venc_prox_fatura();
         var venc_fatura_anterior = _venc_fatura_anterior();
         var dias_ate_venc = Math.ceil((venc_fatura - today)/_1diamilis);
@@ -386,7 +443,7 @@ angular.module('quantofalta').factory('QFModel', function(){
     }
 
     function dias_ate_pagamento(){
-        var today = new Date();
+        var today = m._now();
         var dia_pagamento = _prox_pagamento();
         var dias_ate_pag = Math.ceil((dia_pagamento - today)/_1diamilis);
         return dias_ate_pag;
@@ -403,7 +460,7 @@ angular.module('quantofalta').factory('QFModel', function(){
     function disponivel(){
         var disp = m.saldoinicial - m.fixo() - _soma_gastos();
 
-        if(_this_day() > m.fechamento_fatura){
+        if(_ja_fechou_fatura()){
             disp -= m.fatura_fechada;
         } else {
             disp -= m.proxima_fatura();
@@ -418,6 +475,12 @@ angular.module('quantofalta').factory('QFModel', function(){
         }
         return saldo;
     }
+
+    // salario - custofixopago - gastos = 6000 - 1100 - 200 = 4700
+    // salario - custofixopago - gastos = 6000 - 1300 - 220 = 4480
+    // salario - custofixopago - gastos - fatura_fechada = 6000 - 1300 - 390 - 1850 = 2460
+    // salario - custofixopago - gastos - fatura_fechada = 6000 - 2000 - 890 - 1850 = 1260
+
 
     function fixo(){
         var soma = 0;
@@ -438,34 +501,80 @@ angular.module('quantofalta').factory('QFModel', function(){
     }
 
     function add_gasto(){
-        if(!m.gastos){
-            m.gastos = [];
-        }
-        m.gastos.push({descricao: m.novogasto, valor: parseFloat(m.novovalor)});
-        m.novogasto = '';
-        m.novovalor = '';
-        m.save();
+        GastoPopupModel.open({
+            title: 'Novo gasto',
+            show_date: true,
+        }).then(function(g){
+            if(!m.gastos){
+                m.gastos = [];
+            }
+            m.gastos.push({descricao: g.desc, valor: parseFloat(g.valor), data: g.data});
+            m.save();
+        });
+    }
+
+    function edit_gasto(gasto){
+        GastoPopupModel.open({
+            title: 'Editar gasto',
+            show_date: true,
+            data: gasto.data,
+            desc: gasto.descricao,
+            valor: gasto.valor,
+        }).then(function(g){
+            angular.extend(gasto, {descricao: g.desc, valor: parseFloat(g.valor), data: g.data});
+            m.save();
+        });
     }
 
     function remove_gasto(gasto){
-        var idx = m.gastos.indexOf(gasto);
-        m.gastos.splice(idx, 1);
-        m.save();
+        $ionicPopup.confirm({
+            title: 'Remover gasto ('+gasto.valor+')',
+            template: 'Certeza?'
+        }).then(function(sim){
+            if(sim){
+                var idx = m.gastos.indexOf(gasto);
+                m.gastos.splice(idx, 1);
+                m.save();
+            }
+        });
     }
 
     function add_fixo(){
-        if(!m.fixos){
-            m.fixos = [];
-        }
-        m.fixos.push({descricao: m.novofixo, valor: 0, pago:false});
-        m.novofixo = '';
-        m.save();
+        GastoPopupModel.open({
+            title: 'Novo custo fixo',
+            show_date: false,
+        }).then(function(f){
+            if(!m.fixos){
+                m.fixos = [];
+            }
+            m.fixos.push({descricao: f.desc, valor: f.valor, pago:false});
+            m.save();
+        });
+    }
+
+    function edit_fixo(fixo){
+        GastoPopupModel.open({
+            title: 'Editar custo fixo',
+            show_date: false,
+            desc: fixo.descricao,
+            valor: fixo.valor,
+        }).then(function(f){
+            angular.extend(fixo, {descricao: f.desc, valor: f.valor})
+            m.save();
+        });
     }
 
     function remove_fixo(fixo){
-        var idx = m.fixos.indexOf(fixo);
-        m.fixos.splice(idx, 1);
-        m.save();
+        $ionicPopup.confirm({
+            title: 'Remover custo fixo ('+fixo.valor+')',
+            template: 'Certeza?'
+        }).then(function(sim){
+            if(sim){
+                var idx = m.fixos.indexOf(fixo);
+                m.fixos.splice(idx, 1);
+                m.save();
+            }
+        });
     }
 
     function save(){
@@ -487,13 +596,24 @@ angular.module('quantofalta').directive('quantofalta', function(){
 	};
 });
 
-angular.module('quantofalta').controller('NowCtrl', function($scope, QFModel){
+angular.module('quantofalta').controller('NowCtrl', function($scope, QFModel, $ionicPopup){
     $scope.m = QFModel;
 });
 
 angular.module('quantofalta').controller('FixoCtrl', function($scope, QFModel){
     $scope.m = QFModel;
 });
+
+angular.module('quantofalta').filter('diames', function(){
+    var meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+    return function(t){
+        if(t){
+            d = new Date(t);
+            return d.getDate() + '/' + meses[d.getMonth()];
+        }
+        return '';
+    }
+})
 
 angular.module('ng_bind_html_unsafe', []);
 angular.module('ng_bind_html_unsafe').directive('ngBindHtmlUnsafe', ['$sce', function ($sce) {
@@ -541,10 +661,12 @@ angular.module("fstemplates", []).run(["$templateCache", function($templateCache
 $templateCache.put("TEMPLATE_CACHE/pages/index.html","<!-- aplicacao q eu fiz usando cordova --><html manifest=\"cache.manifest\"><head><meta name=\"viewport\" content=\"initial-scale=1\"><link rel=\"stylesheet\" href=\"./css/lib.css\"><link rel=\"stylesheet\" href=\"./css/fs.css\"><link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css?family=RobotoDraft:300,400,500,700,400italic\"><script src=\"./js/lib.js\"></script><!--FSJS--><!--FSJS END--></head><body ng-app=\"main\"><quantofalta></quantofalta></body></html>");
 $templateCache.put("TEMPLATE_CACHE/pages/index2.html","<!-- aplicacao exemplo do ionic, q eu adaptei pra rodar sozinha no browser --><!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"initial-scale=1,maximum-scale=1,user-scalable=no,width=device-width\"><title>QuantoFalta</title><!-- cordova script (this will be a 404 during development) --><script src=\"cordova.js\"></script><script src=\"./js/lib.js\"></script><link rel=\"stylesheet\" href=\"./css/lib.css\"><link rel=\"stylesheet\" href=\"./css/fs.css\"><!--FSJS--><!--FSJS END--></head><body ng-app=\"main2\"><ion-nav-bar class=\"bar-stable\"><ion-nav-back-button></ion-nav-back-button></ion-nav-bar><ion-nav-view></ion-nav-view></body></html>");
 $templateCache.put("TEMPLATE_CACHE/pages/index3.html","<!-- aplicacao exemplo do ionic, q eu adaptei pra rodar sozinha no browser --><!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"initial-scale=1,maximum-scale=1,user-scalable=no,width=device-width\"><title>QuantoFalta</title><!-- cordova script (this will be a 404 during development) --><script src=\"cordova.js\"></script><script src=\"./js/lib.js\"></script><link rel=\"stylesheet\" href=\"./css/lib.css\"><link rel=\"stylesheet\" href=\"./css/fs.css\"><!--FSJS--><!--FSJS END--></head><body ng-app=\"main3\"><ion-nav-bar class=\"bar-stable\"><ion-nav-back-button></ion-nav-back-button></ion-nav-bar><ion-nav-view></ion-nav-view></body></html>");
+$templateCache.put("TEMPLATE_CACHE/quantofalta/popup_gasto.html","<div class=\"list\"><label class=\"item item-input\" ng-show=\"m.show_date\"><input type=\"date\" ng-model=\"m.data\"></label><label class=\"item item-input\"><input type=\"text\" placeholder=\"Despesa\" ng-model=\"m.desc\"></label><label class=\"item item-input\"><input type=\"number\" placeholder=\"Valor\" ng-model=\"m.valor\"></label></div>");
 $templateCache.put("TEMPLATE_CACHE/quantofalta/quantofalta.html","<div layout=\"column\" flex style=\"height: 100%\"><md-tabs flex md-border-bottom md-autoselect><md-tab label=\"Now\" layout=\"column\"><h4>Resumo</h4><div layout=\"column\"><div layout=\"row\" layout-margin><div flex>$disp/dias faltando:</div><div layout-margin>{{m.disponivel()}} / {{m.dias_ate_pagamento()}}</div></div><div layout=\"row\" layout-margin><div flex>Custo fixo (pago/total):</div><div layout-padding>{{m.fixo_pago()}} / {{m.fixo()}}</div></div><div layout=\"row\" layout-margin><div flex>Proxima fatura:</div><div layout-padding><span class=\"{{m.proxima_fatura() > m.meta_fatura_hoje() ? \'mau\' : \'bom\'}}\">{{m.proxima_fatura()}}</span> / {{m.meta_fatura_hoje() | number : 0}}</div></div><div layout=\"row\" layout-margin><div flex>Saldo estimado:</div><div layout-padding>{{m.saldo_estimado()}}</div></div></div><md-divider></md-divider><h4>Fatura</h4><md-container layout=\"row\"><md-input-container><label>Limite atual</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.lim_atual\"></md-input-container><md-input-container><label>Limite total</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.lim_total\"></md-input-container><md-input-container><label>Fechamento</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.fechamento_fatura\"></md-input-container><md-input-container><label>Parcelado restante</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.parcelado_restante\"></md-input-container></md-container><md-container layout=\"row\"><md-input-container><label>Meta</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.meta_fatura\"></md-input-container><md-input-container><label>Fatura fechada</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.fatura_fechada\"></md-input-container><md-input-container><input type=\"checkbox\" ng-change=\"m.save()\" ng-model=\"m.fatura_paga\"><label>Pago</label></md-input-container></md-container><h4>Conta corrente</h4><md-container layout=\"row\"><md-input-container><label>Saldo inicial</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.saldoinicial\"></md-input-container><md-input-container><label>Dia pagamento</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.dia_pagamento\"></md-input-container></md-container><div layout=\"row\"><md-input-container><label>Novo gasto</label><input ng-model=\"m.novogasto\"></md-input-container><md-input-container><label>Valor</label><input type=\"number\" ng-model=\"m.novovalor\"></md-input-container><md-button ng-click=\"m.add_gasto()\" class=\"md-raised md-primary\">+</md-button></div><md-list><md-list-item ng-repeat=\"g in m.gastos\"><span>{{g.descricao}}</span> <span flex></span> <span>{{g.valor}}</span><md-button ng-click=\"m.remove_gasto(g)\" class=\"md-raised\">-<md-raised></md-raised></md-button></md-list-item></md-list></md-tab><md-tab label=\"Fixo\"><md-list><md-list-item><label>Custo fixo: {{m.fixo()}}</label></md-list-item></md-list><div layout=\"row\"><md-input-container><label>Novo Fixo</label><input ng-model=\"m.novofixo\"></md-input-container><md-button ng-click=\"m.add_fixo()\" class=\"md-raised md-primary\">+</md-button></div><md-container layout=\"row\" ng-repeat=\"f in m.fixos\"><md-input-container><label>{{f.descricao}}</label><input type=\"number\" ng-change=\"m.save()\" ng-model=\"f.valor\"></md-input-container><md-input-container><input type=\"checkbox\" ng-change=\"m.save()\" ng-model=\"f.pago\"></md-input-container><md-button ng-click=\"m.remove_fixo(f)\" class=\"md-raised\">-<md-raised></md-raised></md-button></md-container></md-tab></md-tabs></div>");
-$templateCache.put("TEMPLATE_CACHE/quantofalta/tab_fixo.html","<ion-view view-title=\"Fixo\"><ion-content class=\"padding\"><div class=\"list card\"><div class=\"item item-divider\">Resumo</div></div></ion-content></ion-view>");
-$templateCache.put("TEMPLATE_CACHE/quantofalta/tab_now.html","<ion-view view-title=\"Now\"><ion-content class=\"padding\"><div class=\"list card\"><div class=\"item item-divider\">Resumo</div><div class=\"item item-body row\"><div class=\"col\">$disp/dias faltando:</div><div class=\"col u-align-right\">{{m.disponivel()}} / {{m.dias_ate_pagamento()}}</div></div><div class=\"item item-body row\"><div class=\"col\">Custo fixo (pago/total):</div><div class=\"col u-align-right\">{{m.fixo_pago()}} / {{m.fixo()}}</div></div><div class=\"item item-body row\"><div class=\"col\">Proxima fatura:</div><div class=\"col u-align-right\"><span class=\"{{m.proxima_fatura() > m.meta_fatura_hoje() ? \'mau\' : \'bom\'}}\">{{m.proxima_fatura()}}</span> / {{m.meta_fatura_hoje() | number : 0}}</div></div><div class=\"item item-body row\"><div class=\"col\">Saldo estimado:</div><div class=\"col u-align-right\">{{m.saldo_estimado()}}</div></div></div><div class=\"list card\"><div class=\"item item-divider\">Fatura</div><div class=\"item item-body row\"><label class=\"col item item-input\"><span class=\"input-label\">Lim. atual</span> <input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.lim_atual\"></label><label class=\"col item item-input\"><span class=\"input-label\">Lim. total</span> <input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.lim_total\"></label></div><div class=\"item item-body row\"><label class=\"col item item-input\"><span class=\"input-label\">Fechamento</span> <input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.fechamento_fatura\"></label><label class=\"col item item-input\"><span class=\"input-label\">Parcelado restante</span> <input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.parcelado_restante\"></label></div><div class=\"item item-body row\"><label class=\"col item item-input\"><span class=\"input-label\">Fatura fechada</span> <input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.fatura_fechada\"></label><div class=\"col\"><ion-toggle ng-change=\"m.save()\" ng-model=\"m.fatura_paga\">Pago</ion-toggle></div></div><div class=\"item item-body row\"><label class=\"col item item-input\"><span class=\"input-label\">Meta</span> <input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.meta_fatura\"></label></div></div><div class=\"list card\"><div class=\"item item-divider\">Conta corrente</div><div class=\"item item-body\"><div>You have <b>29</b> meetings on your calendar tomorrow.</div></div></div></ion-content></ion-view>");
-$templateCache.put("TEMPLATE_CACHE/quantofalta/tabs.html","<ion-tabs class=\"tabs-icon-top tabs-color-active-positive\"><ion-tab title=\"Now\" icon-off=\"ion-ios-paper-outline\" icon-on=\"ion-ios-paper\" href=\"#/tab/now\"><ion-nav-view name=\"tab-now\"></ion-nav-view></ion-tab><ion-tab title=\"Fixo\" icon-off=\"ion-ios-bookmarks-outline\" icon-on=\"ion-ios-bookmarks\" href=\"#/tab/fixo\"><ion-nav-view name=\"tab-fixo\"></ion-nav-view></ion-tab></ion-tabs>");
+$templateCache.put("TEMPLATE_CACHE/quantofalta/tab_extrato.html","<ion-view view-title=\"Extrato\"><ion-content class=\"padding\"><div class=\"list card\"><div class=\"item item-divider\">Extrato</div><div class=\"item item-body row\"><div class=\"col\">Custo fixo (pago/total):</div><div class=\"col u-align-right\">{{m.fixo_pago()}} / {{m.fixo()}}</div></div></div><div class=\"list card\"><div class=\"item item-divider\">Custos fixos</div><div class=\"item item-body\"><div class=\"row padding\"><button class=\"col button\" ng-click=\"m.add_fixo()\"><i class=\"icon ion-plus-round\"></i></button></div><div class=\"row gridrow\" ng-repeat=\"f in m.fixos\"><div class=\"col col-10\"><!-- <ion-toggle ng-change=\"m.save()\" ng-model=\"f.pago\"></ion-toggle> --><input type=\"checkbox\" ng-change=\"m.save()\" ng-model=\"f.pago\"></div><div class=\"col col-100\">{{f.descricao}}</div><div class=\"col col-20 u-align-right\">{{f.valor}}</div><div class=\"col col-10 u-align-right\"><button ng-click=\"m.edit_fixo(f)\"><i class=\"icon ion-edit\"></i></button></div><div class=\"col col-10 u-align-right\"><button ng-click=\"m.remove_fixo(f)\"><i class=\"icon ion-trash-a\"></i></button></div></div></div></div></ion-content></ion-view>");
+$templateCache.put("TEMPLATE_CACHE/quantofalta/tab_fixo.html","<ion-view view-title=\"Fixo\"><ion-content class=\"padding\"><div class=\"list card\"><div class=\"item item-divider\">Resumo</div><div class=\"item item-body row\"><div class=\"col\">Custo fixo (pago/total):</div><div class=\"col u-align-right\">{{m.fixo_pago()}} / {{m.fixo()}}</div></div></div><div class=\"list card\"><div class=\"item item-divider\">Custos fixos</div><div class=\"item item-body\"><div class=\"row padding\"><button class=\"col button\" ng-click=\"m.add_fixo()\"><i class=\"icon ion-plus-round\"></i></button></div><div class=\"row gridrow\" ng-repeat=\"f in m.fixos\"><div class=\"col col-10\"><!-- <ion-toggle ng-change=\"m.save()\" ng-model=\"f.pago\"></ion-toggle> --><input type=\"checkbox\" ng-change=\"m.save()\" ng-model=\"f.pago\"></div><div class=\"col col-100\">{{f.descricao}}</div><div class=\"col col-20 u-align-right\">{{f.valor}}</div><div class=\"col col-10 u-align-right\"><button ng-click=\"m.edit_fixo(f)\"><i class=\"icon ion-edit\"></i></button></div><div class=\"col col-10 u-align-right\"><button ng-click=\"m.remove_fixo(f)\"><i class=\"icon ion-trash-a\"></i></button></div></div></div></div></ion-content></ion-view>");
+$templateCache.put("TEMPLATE_CACHE/quantofalta/tab_now.html","<ion-view view-title=\"Now\"><ion-content class=\"padding\"><div class=\"list card\"><div class=\"item item-divider\">Resumo</div><div class=\"item item-body row\"><div class=\"col\">$disp/dias faltando:</div><div class=\"col u-align-right\">{{m.disponivel()}} / {{m.dias_ate_pagamento()}}</div></div><div class=\"item item-body row\"><div class=\"col\">Custo fixo (pago/total):</div><div class=\"col u-align-right\">{{m.fixo_pago()}} / {{m.fixo()}}</div></div><div class=\"item item-body row\"><div class=\"col\">Proxima fatura:</div><div class=\"col u-align-right\"><span class=\"{{m.proxima_fatura() > m.meta_fatura_hoje() ? \'mau\' : \'bom\'}}\">{{m.proxima_fatura()}}</span> / {{m.meta_fatura_hoje() | number : 0}}</div></div><div class=\"item item-body row\"><div class=\"col\">Saldo estimado:</div><div class=\"col u-align-right\">{{m.saldo_estimado()}}</div></div></div><div class=\"list card\"><div class=\"item item-divider\">Fatura</div><div class=\"item item-body row\"><label class=\"col item item-input\"><span class=\"input-label\">Lim. atual</span> <input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.lim_atual\"></label><label class=\"col item item-input\"><span class=\"input-label\">Lim. total</span> <input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.lim_total\"></label></div><div class=\"item item-body row\"><label class=\"col item item-input\"><span class=\"input-label\">Fechamento</span> <input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.fechamento_fatura\"></label><label class=\"col item item-input\"><span class=\"input-label\">Parcelado restante</span> <input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.parcelado_restante\"></label></div><div class=\"item item-body row\"><label class=\"col item item-input\"><span class=\"input-label\">Fatura fechada</span> <input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.fatura_fechada\"></label><div class=\"col\"><ion-toggle ng-change=\"m.save()\" ng-model=\"m.fatura_paga\">Pago</ion-toggle></div></div><div class=\"item item-body row\"><label class=\"col item item-input\"><span class=\"input-label\">Meta</span> <input type=\"number\" ng-change=\"m.save()\" ng-model=\"m.meta_fatura\"></label></div></div><div class=\"list card\"><div class=\"item item-divider\">Gastos no débito</div><div class=\"item item-body\"><div class=\"row padding\"><button class=\"col button\" ng-click=\"m.add_gasto()\"><i class=\"icon ion-plus-round\"></i></button></div><div class=\"row gridrow\" ng-repeat=\"g in m.gastos | orderBy : \'data\'\"><div class=\"col col-20\">{{g.data | diames}}</div><div class=\"col col-100\">{{g.descricao}}</div><div class=\"col col-20 u-align-right\">{{g.valor}}</div><div class=\"col col-10 u-align-right\"><button ng-click=\"m.edit_gasto(g)\"><i class=\"icon ion-edit\"></i></button></div><div class=\"col col-10 u-align-right\"><button ng-click=\"m.remove_gasto(g)\"><i class=\"icon ion-trash-a\"></i></button></div></div></div></div></ion-content></ion-view>");
+$templateCache.put("TEMPLATE_CACHE/quantofalta/tabs.html","<ion-tabs class=\"tabs-icon-top tabs-color-active-positive\"><ion-tab title=\"Now\" icon-off=\"ion-ios-paper-outline\" icon-on=\"ion-ios-paper\" href=\"#/tab/now\"><ion-nav-view name=\"tab-now\"></ion-nav-view></ion-tab><ion-tab title=\"Fixo\" icon-off=\"ion-ios-bookmarks-outline\" icon-on=\"ion-ios-bookmarks\" href=\"#/tab/fixo\"><ion-nav-view name=\"tab-fixo\"></ion-nav-view></ion-tab><!-- <ion-tab title=\"Extrato\" icon-off=\"ion-ios-bookmarks-outline\" icon-on=\"ion-ios-bookmarks\" href=\"#/tab/extrato\">\n        <ion-nav-view name=\"tab-extrato\"></ion-nav-view>\n    </ion-tab> --></ion-tabs>");
 $templateCache.put("TEMPLATE_CACHE/templates/chat-detail.html","<!--\n  This template loads for the \'tab.friend-detail\' state (app.js)\n  \'friend\' is a $scope variable created in the FriendsCtrl controller (controllers.js)\n  The FriendsCtrl pulls data from the Friends service (service.js)\n  The Friends service returns an array of friend data\n--><ion-view view-title=\"{{chat.name}}\"><ion-content class=\"padding\"><img ng-src=\"{{chat.face}}\" style=\"width: 64px; height: 64px\"><p>{{chat.lastText}}</p></ion-content></ion-view>");
 $templateCache.put("TEMPLATE_CACHE/templates/tab-account.html","<ion-view view-title=\"Account\"><ion-content><ion-list><ion-toggle ng-model=\"settings.enableFriends\">Enable Friends</ion-toggle></ion-list></ion-content></ion-view>");
 $templateCache.put("TEMPLATE_CACHE/templates/tab-chats.html","<ion-view view-title=\"Chats\"><ion-content><ion-list><!--item-remove-animate--><ion-item class=\"item-remove-animate item-avatar item-icon-right\" ng-repeat=\"chat in chats\" type=\"item-text-wrap\" href=\"#/tab/chats/{{chat.id}}\"><img ng-src=\"{{chat.face}}\"><h2>{{chat.name}}</h2><p>{{chat.lastText}}</p><i class=\"icon ion-chevron-right icon-accessory\"></i><ion-option-button class=\"button-assertive\" ng-click=\"remove(chat)\">Delete</ion-option-button></ion-item></ion-list></ion-content></ion-view>");

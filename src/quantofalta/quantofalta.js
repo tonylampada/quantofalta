@@ -1,6 +1,6 @@
-angular.module('quantofalta', []);
+angular.module('quantofalta', ['popup_gasto']);
 
-angular.module('quantofalta').factory('QFModel', function(){
+angular.module('quantofalta').factory('QFModel', function(GastoPopupModel, $ionicPopup){
     var _1diamilis = 24*60*60*1000;
     var s = localStorage.getItem('quantofalta');
     var m = s ? angular.fromJson(s) : {
@@ -15,8 +15,6 @@ angular.module('quantofalta').factory('QFModel', function(){
         lim_total: '',
         lim_atual: '',
         gastos: [],
-        novogasto: '',
-        novovalor: '',
         fixos: [],
         novofixo: '',
     };
@@ -31,14 +29,21 @@ angular.module('quantofalta').factory('QFModel', function(){
         fixo: fixo,
         fixo_pago: fixo_pago,
         add_gasto: add_gasto,
+        edit_gasto: edit_gasto,
         remove_gasto: remove_gasto,
         add_fixo: add_fixo,
+        edit_fixo: edit_fixo,
         remove_fixo: remove_fixo,
         save: save,
+        _now: _now,
     });
 
+    function _now(){
+        return new Date();
+    }
+
     function _this_day(){
-        return new Date().getDate();
+        return m._now().getDate();
     }
 
     function _ja_fechou_fatura(){
@@ -46,7 +51,7 @@ angular.module('quantofalta').factory('QFModel', function(){
     }
 
     function _venc_prox_fatura(){
-        var today = new Date();
+        var today = m._now();
         if(_this_day() < m.fechamento_fatura){
             return new Date(1900 + today.getYear(), today.getMonth(), m.fechamento_fatura);
         } else {
@@ -55,7 +60,7 @@ angular.module('quantofalta').factory('QFModel', function(){
     }
 
     function _prox_pagamento(){
-        var today = new Date();
+        var today = m._now();
         if(_this_day() < m.dia_pagamento){
             return new Date(1900 + today.getYear(), today.getMonth(), m.dia_pagamento);
         } else {
@@ -78,7 +83,7 @@ angular.module('quantofalta').factory('QFModel', function(){
     }
 
     function meta_fatura_hoje(){
-        var today = new Date();
+        var today = m._now();
         var venc_fatura = _venc_prox_fatura();
         var venc_fatura_anterior = _venc_fatura_anterior();
         var dias_ate_venc = Math.ceil((venc_fatura - today)/_1diamilis);
@@ -88,7 +93,7 @@ angular.module('quantofalta').factory('QFModel', function(){
     }
 
     function dias_ate_pagamento(){
-        var today = new Date();
+        var today = m._now();
         var dia_pagamento = _prox_pagamento();
         var dias_ate_pag = Math.ceil((dia_pagamento - today)/_1diamilis);
         return dias_ate_pag;
@@ -121,6 +126,12 @@ angular.module('quantofalta').factory('QFModel', function(){
         return saldo;
     }
 
+    // salario - custofixopago - gastos = 6000 - 1100 - 200 = 4700
+    // salario - custofixopago - gastos = 6000 - 1300 - 220 = 4480
+    // salario - custofixopago - gastos - fatura_fechada = 6000 - 1300 - 390 - 1850 = 2460
+    // salario - custofixopago - gastos - fatura_fechada = 6000 - 2000 - 890 - 1850 = 1260
+
+
     function fixo(){
         var soma = 0;
         m.fixos.map(function(f){
@@ -140,34 +151,80 @@ angular.module('quantofalta').factory('QFModel', function(){
     }
 
     function add_gasto(){
-        if(!m.gastos){
-            m.gastos = [];
-        }
-        m.gastos.push({descricao: m.novogasto, valor: parseFloat(m.novovalor)});
-        m.novogasto = '';
-        m.novovalor = '';
-        m.save();
+        GastoPopupModel.open({
+            title: 'Novo gasto',
+            show_date: true,
+        }).then(function(g){
+            if(!m.gastos){
+                m.gastos = [];
+            }
+            m.gastos.push({descricao: g.desc, valor: parseFloat(g.valor), data: g.data});
+            m.save();
+        });
+    }
+
+    function edit_gasto(gasto){
+        GastoPopupModel.open({
+            title: 'Editar gasto',
+            show_date: true,
+            data: gasto.data,
+            desc: gasto.descricao,
+            valor: gasto.valor,
+        }).then(function(g){
+            angular.extend(gasto, {descricao: g.desc, valor: parseFloat(g.valor), data: g.data});
+            m.save();
+        });
     }
 
     function remove_gasto(gasto){
-        var idx = m.gastos.indexOf(gasto);
-        m.gastos.splice(idx, 1);
-        m.save();
+        $ionicPopup.confirm({
+            title: 'Remover gasto ('+gasto.valor+')',
+            template: 'Certeza?'
+        }).then(function(sim){
+            if(sim){
+                var idx = m.gastos.indexOf(gasto);
+                m.gastos.splice(idx, 1);
+                m.save();
+            }
+        });
     }
 
     function add_fixo(){
-        if(!m.fixos){
-            m.fixos = [];
-        }
-        m.fixos.push({descricao: m.novofixo, valor: 0, pago:false});
-        m.novofixo = '';
-        m.save();
+        GastoPopupModel.open({
+            title: 'Novo custo fixo',
+            show_date: false,
+        }).then(function(f){
+            if(!m.fixos){
+                m.fixos = [];
+            }
+            m.fixos.push({descricao: f.desc, valor: f.valor, pago:false});
+            m.save();
+        });
+    }
+
+    function edit_fixo(fixo){
+        GastoPopupModel.open({
+            title: 'Editar custo fixo',
+            show_date: false,
+            desc: fixo.descricao,
+            valor: fixo.valor,
+        }).then(function(f){
+            angular.extend(fixo, {descricao: f.desc, valor: f.valor})
+            m.save();
+        });
     }
 
     function remove_fixo(fixo){
-        var idx = m.fixos.indexOf(fixo);
-        m.fixos.splice(idx, 1);
-        m.save();
+        $ionicPopup.confirm({
+            title: 'Remover custo fixo ('+fixo.valor+')',
+            template: 'Certeza?'
+        }).then(function(sim){
+            if(sim){
+                var idx = m.fixos.indexOf(fixo);
+                m.fixos.splice(idx, 1);
+                m.save();
+            }
+        });
     }
 
     function save(){
@@ -189,10 +246,21 @@ angular.module('quantofalta').directive('quantofalta', function(){
 	};
 });
 
-angular.module('quantofalta').controller('NowCtrl', function($scope, QFModel){
+angular.module('quantofalta').controller('NowCtrl', function($scope, QFModel, $ionicPopup){
     $scope.m = QFModel;
 });
 
 angular.module('quantofalta').controller('FixoCtrl', function($scope, QFModel){
     $scope.m = QFModel;
 });
+
+angular.module('quantofalta').filter('diames', function(){
+    var meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+    return function(t){
+        if(t){
+            d = new Date(t);
+            return d.getDate() + '/' + meses[d.getMonth()];
+        }
+        return '';
+    }
+})

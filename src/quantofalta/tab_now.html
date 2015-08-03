@@ -61,10 +61,17 @@
         </div>
     </div>
     <div class="list card">
-        <div class="item item-divider">Conta corrente</div>
+        <div class="item item-divider">Gastos no débito</div>
         <div class="item item-body">
-            <div>
-                You have <b>29</b> meetings on your calendar tomorrow.
+            <div class="row padding">
+                <button class="col button" ng-click="m.add_gasto()"><i class="icon ion-plus-round"></i></button>
+            </div>
+            <div class="row gridrow" ng-repeat="g in m.gastos | orderBy : 'data'">
+                <div class="col col-20">{{g.data | diames}}</div>
+                <div class="col col-100">{{g.descricao}}</div>
+                <div class="col col-20 u-align-right">{{g.valor}}</div>
+                <div class="col col-10 u-align-right"><button ng-click="m.edit_gasto(g)"><i class="icon ion-edit"></i></button></div>
+                <div class="col col-10 u-align-right"><button ng-click="m.remove_gasto(g)"><i class="icon ion-trash-a"></i></button></div>
             </div>
         </div>
     </div>
