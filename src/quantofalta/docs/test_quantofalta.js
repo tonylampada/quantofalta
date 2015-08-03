@@ -176,17 +176,10 @@ angular.module('teste_quantofalta').factory('QFModelTester', function(QFModel){
     }
 
     function add_gasto(desc, valor){
-        QFModel.novogasto = desc;
-        QFModel.novovalor = valor;
-        QFModel.add_gasto();
+        QFModel.gastos.push({descricao:desc, valor: valor})
     }
 
     function add_fixo(desc, valor, pago){
-        QFModel.novofixo = desc;
-        QFModel.add_fixo();
-        var fixo = QFModel.fixos[QFModel.fixos.length -1];
-        fixo.valor = valor;
-        fixo.pago = pago;
-        QFModel.save();
+        QFModel.fixos.push({descricao:desc, valor: valor, pago:pago})
     }
 })

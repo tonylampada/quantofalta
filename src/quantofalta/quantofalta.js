@@ -198,7 +198,7 @@ angular.module('quantofalta').factory('QFModel', function(GastoPopupModel, $ioni
             if(!m.fixos){
                 m.fixos = [];
             }
-            m.fixos.push({descricao: f.desc, valor: f.valor, data: g.data, pago:false});
+            m.fixos.push({descricao: f.desc, valor: f.valor, data: f.data, pago:false});
             m.save();
         });
     }
@@ -216,8 +216,9 @@ angular.module('quantofalta').factory('QFModel', function(GastoPopupModel, $ioni
             show_date: true,
             desc: fixo.descricao,
             valor: fixo.valor,
+            data: fixo.data,
         }).then(function(f){
-            angular.extend(fixo, {descricao: f.desc, valor: f.valor, data: g.data})
+            angular.extend(fixo, {descricao: f.desc, valor: f.valor, data: f.data})
             m.save();
         });
     }
@@ -254,7 +255,7 @@ angular.module('quantofalta').factory('QFExtratoModel', function(QFModel, $filte
 
     function update(){
         em.saldoinicial = QFModel.saldoinicial;
-        em.faturapaga = QFModel.faturapaga ? QFModel.fatura_fechada : 0;
+        em.faturapaga = QFModel.fatura_paga ? QFModel.fatura_fechada : 0;
         var gastos = angular.copy(QFModel.gastos);
         var fixos = angular.copy(QFModel.fixos);
         gastos.map(function(g){g.prefix = 'G'});
