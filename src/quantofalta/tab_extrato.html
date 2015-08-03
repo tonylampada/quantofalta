@@ -2,27 +2,24 @@
   <ion-content class="padding">
     <div class="list card">
         <div class="item item-divider">Extrato</div>
-
-        <div class="item item-body row">
-            <div class="col">Custo fixo (pago/total):</div>
-            <div class="col u-align-right">{{m.fixo_pago()}} / {{m.fixo()}}</div>
-        </div>
-    </div>
-    <div class="list card">
-        <div class="item item-divider">Custos fixos</div>
         <div class="item item-body">
-            <div class="row padding">
-                <button class="col button" ng-click="m.add_fixo()"><i class="icon ion-plus-round"></i></button>
+            <div class="row gridrow">
+                <div class="col col-20"></div>
+                <div class="col col-100">Saldo Inicial</div>
+                <div class="col col-20 u-align-right"></div>
+                <div class="col col-20 u-align-right">{{em.saldoinicial}}</div>
             </div>
-            <div class="row gridrow" ng-repeat="f in m.fixos">
-                <div class="col col-10">
-                    <!-- <ion-toggle ng-change="m.save()" ng-model="f.pago"></ion-toggle> -->
-                    <input type="checkbox" ng-change="m.save()" ng-model="f.pago">
-                </div>
-                <div class="col col-100">{{f.descricao}}</div>
-                <div class="col col-20 u-align-right">{{f.valor}}</div>
-                <div class="col col-10 u-align-right"><button ng-click="m.edit_fixo(f)"><i class="icon ion-edit"></i></button></div>
-                <div class="col col-10 u-align-right"><button ng-click="m.remove_fixo(f)"><i class="icon ion-trash-a"></i></button></div>
+            <div class="row gridrow" ng-show="em.faturapaga">
+                <div class="col col-20"></div>
+                <div class="col col-100">Carão de crédito</div>
+                <div class="col col-20 u-align-right">{{em.faturapaga}}</div>
+                <div class="col col-20 u-align-right">{{em.saldoinicial - em.faturapaga}}</div>
+            </div>
+            <div class="row gridrow" ng-repeat="item in em.items">
+                <div class="col col-20">{{item.data | diames}}</div>
+                <div class="col col-100">({{item.prefix}}) {{item.descricao}}</div>
+                <div class="col col-20 u-align-right">{{item.valor}}</div>
+                <div class="col col-20 u-align-right">{{item.saldo}}</div>
             </div>
         </div>
     </div>

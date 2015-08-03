@@ -32,6 +32,7 @@ angular.module('quantofalta').factory('QFModel', function(GastoPopupModel, $ioni
         edit_gasto: edit_gasto,
         remove_gasto: remove_gasto,
         add_fixo: add_fixo,
+        change_fixo_pago: change_fixo_pago,
         edit_fixo: edit_fixo,
         remove_fixo: remove_fixo,
         save: save,
@@ -192,24 +193,31 @@ angular.module('quantofalta').factory('QFModel', function(GastoPopupModel, $ioni
     function add_fixo(){
         GastoPopupModel.open({
             title: 'Novo custo fixo',
-            show_date: false,
+            show_date: true,
         }).then(function(f){
             if(!m.fixos){
                 m.fixos = [];
             }
-            m.fixos.push({descricao: f.desc, valor: f.valor, pago:false});
+            m.fixos.push({descricao: f.desc, valor: f.valor, data: g.data, pago:false});
             m.save();
         });
+    }
+
+    function change_fixo_pago(f){
+        if(f.pago){
+            f.data = m._now().getTime();
+        }
+        m.save();
     }
 
     function edit_fixo(fixo){
         GastoPopupModel.open({
             title: 'Editar custo fixo',
-            show_date: false,
+            show_date: true,
             desc: fixo.descricao,
             valor: fixo.valor,
         }).then(function(f){
-            angular.extend(fixo, {descricao: f.desc, valor: f.valor})
+            angular.extend(fixo, {descricao: f.desc, valor: f.valor, data: g.data})
             m.save();
         });
     }
@@ -234,6 +242,35 @@ angular.module('quantofalta').factory('QFModel', function(GastoPopupModel, $ioni
     return m;
 });
 
+angular.module('quantofalta').factory('QFExtratoModel', function(QFModel, $filter){
+    var em = {
+        saldoinicial: 0,
+        items: [],
+    };
+
+    angular.extend(em, {
+        update: update,
+    });
+
+    function update(){
+        em.saldoinicial = QFModel.saldoinicial;
+        em.faturapaga = QFModel.faturapaga ? QFModel.fatura_fechada : 0;
+        var gastos = angular.copy(QFModel.gastos);
+        var fixos = angular.copy(QFModel.fixos);
+        gastos.map(function(g){g.prefix = 'G'});
+        fixos.map(function(f){f.prefix = 'F'});
+        var items = $filter('orderBy')(gastos.concat(fixos), 'data');
+        var saldo = em.saldoinicial - em.faturapaga;
+        items.map(function(item){
+            item.saldo = saldo - item.valor;
+            saldo = item.saldo;
+        });
+        em.items = items;
+    }
+
+    return em;
+});
+
 angular.module('quantofalta').directive('quantofalta', function(){
 	return {
 		restrict: 'E',
@@ -252,6 +289,16 @@ angular.module('quantofalta').controller('NowCtrl', function($scope, QFModel, $i
 
 angular.module('quantofalta').controller('FixoCtrl', function($scope, QFModel){
     $scope.m = QFModel;
+});
+
+angular.module('quantofalta').controller('ExtratoCtrl', function($scope, QFExtratoModel, $rootScope){
+    var em = $scope.em = QFExtratoModel;
+    em.update();
+    $rootScope.$on('$stateChangeSuccess', function(event, toState, toParams, fromState, fromParams){
+        if(toState.name == 'tab.extrato'){
+            em.update();
+        }
+    })
 });
 
 angular.module('quantofalta').filter('diames', function(){

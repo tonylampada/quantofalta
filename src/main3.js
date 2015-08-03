@@ -37,12 +37,21 @@
                 }
             }
         })
-        .state('tab.fixo', {
+		.state('tab.fixo', {
             url: '/fixo',
             views: {
                 'tab-fixo': {
                     templateUrl: FS.BASE_URL+'quantofalta/tab_fixo.html',
                     controller: 'FixoCtrl'
+                }
+            }
+        })
+		.state('tab.extrato', {
+            url: '/extrato',
+            views: {
+                'tab-extrato': {
+                    templateUrl: FS.BASE_URL+'quantofalta/tab_extrato.html',
+                    controller: 'ExtratoCtrl'
                 }
             }
         });

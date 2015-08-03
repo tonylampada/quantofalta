@@ -17,7 +17,7 @@
             <div class="row gridrow" ng-repeat="f in m.fixos">
                 <div class="col col-10">
                     <!-- <ion-toggle ng-change="m.save()" ng-model="f.pago"></ion-toggle> -->
-                    <input type="checkbox" ng-change="m.save()" ng-model="f.pago">
+                    <input type="checkbox" ng-change="m.change_fixo_pago(f)" ng-model="f.pago">
                 </div>
                 <div class="col col-100">{{f.descricao}}</div>
                 <div class="col col-20 u-align-right">{{f.valor}}</div>
