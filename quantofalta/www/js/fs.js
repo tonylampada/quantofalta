@@ -617,6 +617,7 @@ angular.module('quantofalta').factory('QFExtratoModel', function(QFModel, $filte
         em.faturapaga = QFModel.fatura_paga ? QFModel.fatura_fechada : 0;
         var gastos = angular.copy(QFModel.gastos);
         var fixos = angular.copy(QFModel.fixos);
+        fixos = fixos.filter(function(f){return f.pago});
         gastos.map(function(g){g.prefix = 'G'});
         fixos.map(function(f){f.prefix = 'F'});
         var items = $filter('orderBy')(gastos.concat(fixos), 'data');
